@@ -10,6 +10,7 @@ const allowedSlugs = new Set([
   'youtube',
   'instagram',
   'tiktok',
+  'facebook',
   'x',
   'twitch',
   'kick',

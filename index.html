@@ -299,6 +299,7 @@ textarea{resize:vertical;min-height:110px}
 <option>YouTube</option>
 <option>Instagram</option>
 <option>TikTok</option>
+<option>Facebook</option>
 <option>X / Twitter</option>
 </optgroup>
 <optgroup label="Gaming">
@@ -317,10 +318,11 @@ textarea{resize:vertical;min-height:110px}
 <label for="scheduleTitle" data-i18n="contentTitleLabel">Content title</label>
 <input id="scheduleTitle" placeholder="Content title" autocomplete="off" />
 <label for="schedulePlatforms" data-i18n="schedulePlatformsLabel">Platforms</label>
-<select id="schedulePlatforms" multiple size="7" aria-describedby="schedulePlatformHelp">
+<select id="schedulePlatforms" multiple size="8" aria-describedby="schedulePlatformHelp">
 <option>YouTube</option>
 <option>Instagram</option>
 <option>TikTok</option>
+<option>Facebook</option>
 <option>X / Twitter</option>
 <option>Twitch</option>
 <option>Kick</option>
@@ -484,8 +486,8 @@ let library=JSON.parse(localStorage.getItem(workspaceKey('library'))||'[]');
 let schedules=JSON.parse(localStorage.getItem(workspaceKey('schedules'))||'[]');
 let backupBin=JSON.parse(localStorage.getItem(workspaceKey('backupBin'))||'[]');
 let backupFilter=localStorage.getItem(workspaceKey('backupFilter'))||'all';
-const platformCatalog=['YouTube','Instagram','TikTok','X / Twitter','Twitch','Kick','YouTube Gaming'];
-const platformSlugs={'YouTube':'youtube','Instagram':'instagram','TikTok':'tiktok','X / Twitter':'x','Twitch':'twitch','Kick':'kick','YouTube Gaming':'youtube-gaming'};
+const platformCatalog=['YouTube','Instagram','TikTok','Facebook','X / Twitter','Twitch','Kick','YouTube Gaming'];
+const platformSlugs={'YouTube':'youtube','Instagram':'instagram','TikTok':'tiktok','Facebook':'facebook','X / Twitter':'x','Twitch':'twitch','Kick':'kick','YouTube Gaming':'youtube-gaming'};
 const platformBySlug=Object.fromEntries(Object.entries(platformSlugs).map(([name,slug])=>[slug,name]));
 let connections=JSON.parse(localStorage.getItem(workspaceKey('connections'))||'{}');
 let connectionMeta=JSON.parse(localStorage.getItem(workspaceKey('connectionMeta'))||'{}');
