@@ -98,6 +98,10 @@ textarea{resize:vertical;min-height:110px}
 .ticket-card{background:var(--status-bg);border:1px solid var(--status-border);border-radius:10px;padding:12px}
 .ticket-head{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .faq-list{margin:8px 0 0 18px;color:var(--muted)}
+.ai-chat-list{max-height:260px;overflow:auto;border:1px solid var(--status-border);border-radius:8px;padding:10px;background:var(--status-bg);margin-bottom:10px}
+.ai-chat-item{padding:8px;border-bottom:1px solid var(--status-border)}
+.ai-chat-item:last-child{border-bottom:none}
+.ai-chat-role{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 @media (prefers-reduced-motion: reduce){
  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
 }
@@ -385,6 +389,17 @@ textarea{resize:vertical;min-height:110px}
 <p data-i18n="supportSubtitle">Submit questions, report bugs, and get instant guidance.</p>
 <div class="settings-grid">
 <div class="card">
+<h3 data-i18n="supportAiTitle">AI Support Assistant</h3>
+<p class="status-detail"><span data-i18n="supportContextLabel">Current context:</span> <strong id="supportContext">home</strong></p>
+<div id="aiChatList" class="ai-chat-list"></div>
+<label for="aiHelpInput" data-i18n="supportAiQuestionLabel">Ask a question</label>
+<div class="share-row">
+<input id="aiHelpInput" autocomplete="off" placeholder="Ask about scheduling, connections, analytics, or CreatorCast" />
+<button class="btn" type="button" onclick="askAiHelp()" data-i18n="supportAskAction">Ask AI</button>
+</div>
+<p class="status-detail" id="aiHelpMeta"></p>
+</div>
+<div class="card">
 <h3 data-i18n="submitTicketTitle">Submit a Ticket</h3>
 <label for="ticketType" data-i18n="ticketTypeLabel">Issue Type</label>
 <select id="ticketType">
@@ -421,7 +436,7 @@ const messages={
    skipToMain:'Skip to main content',navHome:'Home',navDashboard:'Dashboard',navConnections:'Connections',navUpload:'Upload',navScheduler:'Scheduler',navLibrary:'Library',navBackup:'Backup Bin',navCollaboration:'CreatorCast',navSupport:'Help Desk',toggleContrast:'High Contrast',
   uploadPrimaryCta:'Upload Content',connectPlatformsCta:'Connect Platforms',toolsTitle:'Your Tools',openToolAction:'Open Tool',supportedPlatformsTitle:'Supported Platforms',settingsTitle:'Settings',settingsGeneralTitle:'General',languageLabel:'Language',settingsOpenText:'Manage language, contrast, and backup bin.',
   openCreatorCast:'Open CreatorCast',collaborationTitle:'CreatorCast Collaboration',collaborationSubtitle:'Share this workspace with your team and collaborate in real time.',workspaceShareTitle:'Workspace Sharing',workspaceIdLabel:'Workspace ID',joinWorkspace:'Open Workspace',generateWorkspace:'Generate New',shareRoleLabel:'Permission for shared link',roleOwner:'Owner',roleEditor:'Editor',roleViewer:'Viewer',shareLinkLabel:'Share link',copyLink:'Copy Link',discussionTitle:'Discussion',displayNameLabel:'Display name',yourRoleLabel:'Your role',messageLabel:'Message',sendMessage:'Send',viewerNotice:'Viewer mode: editing is locked.',editorNotice:'Editor mode: you can update workspace content.',ownerNotice:'Owner mode: full workspace permissions.',
-  supportTitle:'Help Desk',supportSubtitle:'Submit questions, report bugs, and get instant guidance.',submitTicketTitle:'Submit a Ticket',ticketTypeLabel:'Issue Type',ticketTypeQuestion:'Question',ticketTypeBug:'Bug Report',ticketTypeAssistance:'Need Assistance',ticketSubjectLabel:'Subject',ticketMessageLabel:'Message',submitTicketAction:'Submit Ticket',faqSuggestedTitle:'Suggested FAQs',adminPanelTitle:'Admin Ticket Panel',supportAutoReplyDefault:'Auto-reply will appear here.',supportNeedMessage:'Please add a subject and message before submitting.',supportTicketAdded:'Support ticket submitted.',supportNoTickets:'No support tickets yet.',supportAdminOnly:'Admin responses are available for Owner/Editor.',supportStatusOpen:'Open',supportStatusResolved:'Resolved',supportResolveAction:'Mark Resolved',supportRespondAction:'Send Reply',supportReplyPlaceholder:'Write an admin response...',
+  supportTitle:'Help Desk',supportSubtitle:'Submit questions, report bugs, and get instant guidance.',supportAiTitle:'AI Support Assistant',supportContextLabel:'Current context:',supportAiQuestionLabel:'Ask a question',supportAskAction:'Ask AI',supportAiNoQuestion:'Please enter your question first.',supportAiSolved:'AI provided a suggested solution.',supportAiEscalated:'AI could not fully solve this. Ticket created automatically.',supportAiConfidence:'Confidence',submitTicketTitle:'Submit a Ticket',ticketTypeLabel:'Issue Type',ticketTypeQuestion:'Question',ticketTypeBug:'Bug Report',ticketTypeAssistance:'Need Assistance',ticketSubjectLabel:'Subject',ticketMessageLabel:'Message',submitTicketAction:'Submit Ticket',faqSuggestedTitle:'Suggested FAQs',adminPanelTitle:'Admin Ticket Panel',supportAutoReplyDefault:'Auto-reply will appear here.',supportNeedMessage:'Please add a subject and message before submitting.',supportTicketAdded:'Support ticket submitted.',supportNoTickets:'No support tickets yet.',supportAdminOnly:'Admin responses are available for Owner/Editor.',supportStatusOpen:'Open',supportStatusResolved:'Resolved',supportResolveAction:'Mark Resolved',supportRespondAction:'Send Reply',supportReplyPlaceholder:'Write an admin response...',
   heroTitle:'Upload Once. Reach Everywhere.',heroSubtitle:'A creator platform to upload, schedule and manage content across platforms.',
   cardUploadTitle:'Upload Content',cardUploadText:'Add videos or posts to your creator library.',cardScheduleTitle:'Schedule Posts',cardScheduleText:'Choose exactly when your content goes live.',
   cardPlatformsTitle:'Manage Platforms',cardPlatformsText:'Control all creator accounts from one place.',cardDashboardTitle:'Creator Dashboard',cardDashboardText:'Track upcoming posts and manage your workflow.',
@@ -534,7 +549,9 @@ let connectionMeta=JSON.parse(localStorage.getItem(workspaceKey('connectionMeta'
 let integrationSettings=JSON.parse(localStorage.getItem(workspaceKey('integrationSettings'))||'{"backendBaseUrl":""}');
 let collaborationMessages=JSON.parse(localStorage.getItem(workspaceKey('discussion'))||'[]');
 let helpTickets=JSON.parse(localStorage.getItem(workspaceKey('helpTickets'))||'[]');
+let aiHelpThread=JSON.parse(localStorage.getItem(workspaceKey('aiHelpThread'))||'[]');
 let collaborationName=localStorage.getItem('creatorcastDisplayName')||'Guest';
+let lastNonSupportSection='home';
 const creatorCastChannel=typeof BroadcastChannel!=='undefined'?new BroadcastChannel('creatorcast-workspace'):null;
 let analyticsResults=[];
 
@@ -637,6 +654,7 @@ function blockViewerEdits(){
 }
 
 function show(section){
+ if(section!=='support') lastNonSupportSection=section;
  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
  document.getElementById(section).classList.add('active');
  document.querySelectorAll('[role="tab"]').forEach(t=>t.setAttribute('aria-selected','false'));
@@ -668,7 +686,8 @@ function buildWorkspaceState(){
   connectionMeta,
   integrationSettings,
   collaborationMessages,
-  helpTickets
+  helpTickets,
+  aiHelpThread
  };
 }
 
@@ -683,6 +702,7 @@ function applyWorkspaceState(nextState){
  integrationSettings=(nextState.integrationSettings&&typeof nextState.integrationSettings==='object')?nextState.integrationSettings:{backendBaseUrl:''};
  collaborationMessages=Array.isArray(nextState.collaborationMessages)?nextState.collaborationMessages:[];
  helpTickets=Array.isArray(nextState.helpTickets)?nextState.helpTickets:[];
+ aiHelpThread=Array.isArray(nextState.aiHelpThread)?nextState.aiHelpThread:[];
  normalizeDataState();
  normalizeConnections();
  save(true);
@@ -767,6 +787,7 @@ function applyWorkspaceId(){
  integrationSettings=JSON.parse(localStorage.getItem(workspaceKey('integrationSettings'))||'{"backendBaseUrl":""}');
  collaborationMessages=JSON.parse(localStorage.getItem(workspaceKey('discussion'))||'[]');
  helpTickets=JSON.parse(localStorage.getItem(workspaceKey('helpTickets'))||'[]');
+ aiHelpThread=JSON.parse(localStorage.getItem(workspaceKey('aiHelpThread'))||'[]');
  normalizeDataState();
  normalizeConnections();
  loadWorkspaceState();
@@ -840,6 +861,124 @@ function suggestFaqs(text){
  if(/delete|backup|restore|hidden/.test(normalized)) suggestions.push('How do I restore deleted items from Backup Bin?');
  if(!suggestions.length) suggestions.push('Visit Settings to configure preferences and backup controls.');
  return suggestions.slice(0,3);
+}
+
+function knowledgeAnswer(question,contextSection){
+ const text=String(question||'').toLowerCase();
+ const section=String(contextSection||'home').toLowerCase();
+
+ if(/connect|oauth|login|account|verify/.test(text)){
+  return {
+   confidence:0.91,
+   answer:'Open Connections, set your backend URL, save settings, then use Connect via OAuth and Verify.',
+   guides:['Connections page setup', 'OAuth connect flow', 'Verify status endpoint']
+  };
+ }
+ if(/schedule|publish|time|date/.test(text)){
+  return {
+   confidence:0.9,
+   answer:'Use Scheduler, choose one or more platforms, pick date/time, and submit to create entries.',
+   guides:['Multi-platform scheduling', 'Date/time selection', 'Hidden vs deleted schedule items']
+  };
+ }
+ if(/analytics|views|likes|comments|engagement|metrics/.test(text)){
+  return {
+   confidence:0.88,
+   answer:'Go to Dashboard and click Load Analytics. Ensure at least one platform is connected and backend URL is set.',
+   guides:['Connected platforms requirement', 'Analytics load action', 'Performance summary interpretation']
+  };
+ }
+ if(/collab|creatorcast|share|workspace|qr/.test(text)){
+  return {
+   confidence:0.92,
+   answer:'Open CreatorCast, choose a Workspace ID, then share link or QR. Use roles Owner, Editor, Viewer for permissions.',
+   guides:['Workspace ID usage', 'Role permissions', 'Real-time sync behavior']
+  };
+ }
+ if(/delete|backup|restore|hidden|bin/.test(text)){
+  return {
+   confidence:0.89,
+   answer:'Deleted items move to Backup Bin where you can restore or permanently delete. Hidden items stay in their section.',
+   guides:['Backup Bin filter', 'Restore action', 'Permanent delete confirmations']
+  };
+ }
+
+ if(section==='connections'){
+  return {
+   confidence:0.62,
+   answer:'You are in Connections context. If you need account linking help, use Connect via OAuth then Verify for each platform.',
+   guides:['Connections quick steps', 'Backend URL requirement']
+  };
+ }
+ if(section==='scheduler'){
+  return {
+   confidence:0.62,
+   answer:'You are in Scheduler context. Select one or more platforms and set date/time before submitting.',
+   guides:['Scheduler required fields', 'Multi-select platform usage']
+  };
+ }
+ if(section==='dashboard'){
+  return {
+   confidence:0.62,
+   answer:'You are in Dashboard context. Check stats cards and load analytics for connected platforms.',
+   guides:['Dashboard cards', 'Analytics prerequisites']
+  };
+ }
+
+ return {
+  confidence:0.34,
+  answer:'I am not fully confident on this issue yet. I can create a ticket now so the team can follow up.',
+  guides:['Provide reproduction steps', 'Include browser/device details']
+ };
+}
+
+function createTicketFromAi(question,contextSection,aiAnswer){
+ helpTickets.unshift({
+  id:nextId('ticket'),
+  type:'assistance',
+  subject:'AI Escalation: '+question.slice(0,80),
+  message:'User question: '+question+'\nContext: '+contextSection+'\nAI answer: '+aiAnswer,
+  autoReply:'AI escalated this ticket for manual review.',
+  status:'open',
+  adminReply:'',
+  createdAt:new Date().toISOString()
+ });
+ if(helpTickets.length>250) helpTickets=helpTickets.slice(0,250);
+}
+
+function askAiHelp(){
+ const input=document.getElementById('aiHelpInput');
+ const question=(input&&input.value?input.value:'').trim();
+ if(!question){
+  announce(t('supportAiNoQuestion'));
+  return;
+ }
+ const contextSection=lastNonSupportSection;
+ const result=knowledgeAnswer(question,contextSection);
+ const solved=result.confidence>=0.58;
+
+ aiHelpThread.push({id:nextId('aiq'),role:'user',text:question,createdAt:new Date().toISOString()});
+ aiHelpThread.push({
+  id:nextId('aia'),
+  role:'assistant',
+  text:result.answer,
+  guides:result.guides,
+  confidence:result.confidence,
+  context:contextSection,
+  solved,
+  createdAt:new Date().toISOString()
+ });
+
+ if(!solved){
+  createTicketFromAi(question,contextSection,result.answer);
+ }
+
+ if(aiHelpThread.length>120) aiHelpThread=aiHelpThread.slice(-120);
+ save();
+ renderSupport();
+ renderFaqSuggestions(question);
+ if(input) input.value='';
+ announce(solved?t('supportAiSolved'):t('supportAiEscalated'));
 }
 
 function autoReplyForTicket(subject,message){
@@ -931,8 +1070,28 @@ function renderSupport(){
  const autoReply=document.getElementById('supportAutoReply');
  const list=document.getElementById('supportTicketList');
  const notice=document.getElementById('adminSupportNotice');
- if(!autoReply||!list||!notice) return;
+ const chat=document.getElementById('aiChatList');
+ const context=document.getElementById('supportContext');
+ const meta=document.getElementById('aiHelpMeta');
+ if(!autoReply||!list||!notice||!chat||!context||!meta) return;
  updateSupportBadges();
+
+ context.textContent=lastNonSupportSection;
+ chat.innerHTML='';
+ if(!aiHelpThread.length){
+  chat.innerHTML='<p class="status-detail">Ask AI anything about Creatorverse support.</p>';
+ }else{
+  aiHelpThread.slice().forEach(item=>{
+   const row=document.createElement('div');
+   row.className='ai-chat-item';
+   const guides=(item.guides&&item.guides.length)?('<ul class="faq-list">'+item.guides.map(guide=>'<li>'+guide+'</li>').join('')+'</ul>'):'';
+   const confidence=(typeof item.confidence==='number')?('<div class="discussion-meta">'+t('supportAiConfidence')+': '+Math.round(item.confidence*100)+'%</div>'):'';
+   row.innerHTML='<div class="ai-chat-role">'+item.role+'</div><div>'+item.text+'</div>'+confidence+guides;
+   chat.appendChild(row);
+  });
+ }
+ const lastAi=[...aiHelpThread].reverse().find(item=>item.role==='assistant' && typeof item.confidence==='number');
+ meta.textContent=lastAi?(t('supportAiConfidence')+': '+Math.round(lastAi.confidence*100)+'% | Context: '+(lastAi.context||lastNonSupportSection)):('Context: '+lastNonSupportSection);
 
  if(!autoReply.textContent.trim()) autoReply.textContent=t('supportAutoReplyDefault');
  notice.textContent=canEditWorkspace()?t('ownerNotice'):t('supportAdminOnly');
@@ -1096,6 +1255,7 @@ function save(skipBroadcast){
  localStorage.setItem(workspaceKey('integrationSettings'),JSON.stringify(integrationSettings));
  localStorage.setItem(workspaceKey('discussion'),JSON.stringify(collaborationMessages));
  localStorage.setItem(workspaceKey('helpTickets'),JSON.stringify(helpTickets));
+ localStorage.setItem(workspaceKey('aiHelpThread'),JSON.stringify(aiHelpThread));
  if(!skipBroadcast) broadcastWorkspaceUpdate('state');
 }
 
@@ -1761,10 +1921,15 @@ document.getElementById('supportAutoReply').textContent=t('supportAutoReplyDefau
 document.getElementById('ticketMessage').addEventListener('input',event=>{
  renderFaqSuggestions(event.target.value||'');
 });
+document.getElementById('aiHelpInput').addEventListener('keydown',event=>{
+ if(event.key==='Enter') askAiHelp();
+});
 if(!localStorage.getItem('language')) localStorage.setItem('language',language);
 normalizeDataState();
 normalizeConnections();
 loadWorkspaceState();
+const activeSection=document.querySelector('.section.active');
+if(activeSection&&activeSection.id&&activeSection.id!=='support') lastNonSupportSection=activeSection.id;
 applyContrast();
 applyTranslations();
 renderConnections();
