@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Creatorverse.ai</title>
+<style>
+*{box-sizing:border-box}
+:root{
+ --bg:#0f172a;
+ --text:#ffffff;
+ --muted:#cbd5f5;
+ --nav:#020617;
+ --card:#1e293b;
+ --button:#4f46e5;
+ --button-text:#ffffff;
+ --field-bg:#f8fafc;
+ --field-text:#0f172a;
+ --field-border:#64748b;
+ --status-bg:#0b1326;
+ --status-border:#334155;
+ --focus:#f59e0b;
+}
+body[data-contrast="high"]{
+ --bg:#000000;
+ --text:#ffffff;
+ --muted:#ffffff;
+ --nav:#000000;
+ --card:#111111;
+ --button:#ffff00;
+ --button-text:#000000;
+ --field-bg:#ffffff;
+ --field-text:#000000;
+ --field-border:#ffffff;
+ --status-bg:#111111;
+ --status-border:#ffffff;
+ --focus:#00ffff;
+}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+.skip-link{position:absolute;left:-9999px;top:10px;background:#f8fafc;color:#020617;padding:10px 14px;border-radius:8px;z-index:1000}
+.skip-link:focus{left:10px}
+nav{display:flex;justify-content:space-between;align-items:center;padding:18px 30px;background:var(--nav);position:sticky;top:0;gap:16px;flex-wrap:wrap}
+nav h2{margin:0}
+.nav-main{display:flex;align-items:center;gap:12px}
+.nav-links{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.menu-toggle{display:none;background:transparent;border:1px solid var(--status-border);color:var(--text);border-radius:10px;padding:8px 10px;cursor:pointer}
+.menu-toggle span{display:block;width:20px;height:2px;background:var(--text);margin:4px 0}
+.hero{padding:90px 20px;text-align:center}
+.hero h1{font-size:46px;margin-bottom:10px}
+.hero p{color:var(--muted)}
+.btn{background:var(--button);border:none;color:var(--button-text);padding:10px 18px;border-radius:12px;cursor:pointer;box-shadow:0 10px 20px rgba(2,6,23,.25);transition:transform .18s ease,box-shadow .18s ease,filter .18s ease}
+.btn:hover{transform:translateY(-1px);box-shadow:0 14px 24px rgba(2,6,23,.35);filter:brightness(1.05)}
+.btn-primary{font-size:1.05rem;padding:13px 22px}
+.hero-actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:16px}
+.container{max-width:1100px;margin:auto;padding:20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
+.card{background:var(--card);padding:20px;border-radius:10px}
+.tool-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:14px}
+.tool-card h4{margin:0 0 8px 0}
+.section{display:none}
+.section.active{display:block}
+.connection-card{display:flex;flex-direction:column;gap:10px}
+.connection-status{font-weight:700}
+.status-pill{display:inline-block;padding:4px 10px;border-radius:999px;font-size:.85rem;font-weight:700;width:fit-content}
+.status-pill.connected{background:#14532d;color:#dcfce7}
+.status-pill.disconnected{background:#7f1d1d;color:#fee2e2}
+.status-detail{font-size:.92rem;color:var(--muted);margin:0}
+.card-actions{display:flex;gap:8px;flex-wrap:wrap}
+.upload-panel{max-width:900px;background:var(--card);padding:30px;border-radius:14px}
+.upload-panel p{margin-top:0;color:var(--muted)}
+.upload-panel input,.upload-panel select,.upload-panel textarea{font-size:1.05rem;min-height:48px}
+.upload-panel .btn{font-size:1.05rem;padding:12px 20px}
+label{display:block;font-weight:700;margin-top:10px}
+input,select,textarea{width:100%;padding:10px;margin-top:8px;margin-bottom:12px;border-radius:6px;border:1px solid var(--field-border);background:var(--field-bg);color:var(--field-text)}
+textarea{resize:vertical;min-height:110px}
+.post{background:var(--card);margin-top:10px;padding:12px;border-radius:6px}
+.footer{margin-top:40px;background:var(--nav);text-align:center;padding:18px;color:#94a3b8}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.status{margin-top:12px;padding:10px;border-radius:8px;background:var(--status-bg);border:1px solid var(--status-border)}
+.btn:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.analytics-panel{margin-top:20px;background:var(--card);padding:16px;border-radius:10px}
+.analytics-summary{margin-bottom:10px;color:var(--muted)}
+.analytics-table{width:100%;border-collapse:collapse}
+.analytics-table th,.analytics-table td{border-bottom:1px solid var(--status-border);padding:8px;text-align:left}
+.settings-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px}
+@media (prefers-reduced-motion: reduce){
+ *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+@media (max-width:900px){
+ .menu-toggle{display:block}
+ .nav-links{display:none;width:100%;padding-top:8px}
+ nav.menu-open .nav-links{display:flex;flex-direction:column;align-items:stretch}
+ .nav-links .btn{width:100%}
+}
+@media (max-width:700px){
+ .hero h1{font-size:34px}
+ .upload-panel{padding:20px}
+}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main-content" data-i18n="skipToMain">Skip to main content</a>
+<nav aria-label="Primary">
+<div class="nav-main">
+<h2>Creatorverse.ai</h2>
+<button class="menu-toggle" type="button" aria-label="Toggle menu" onclick="toggleMenu()">
+<span></span><span></span><span></span>
+</button>
+</div>
+<div class="nav-links" role="tablist" aria-label="Main Sections">
+<button class="btn" onclick="show('home')" role="tab" id="tab-home" aria-controls="home" aria-selected="true" data-i18n="navHome">Home</button>
+<button class="btn" onclick="show('dashboard')" role="tab" id="tab-dashboard" aria-controls="dashboard" aria-selected="false" data-i18n="navDashboard">Dashboard</button>
+<button class="btn" onclick="show('connections')" role="tab" id="tab-connections" aria-controls="connections" aria-selected="false" data-i18n="navConnections">Connections</button>
+<button class="btn btn-primary" onclick="show('upload')" role="tab" id="tab-upload" aria-controls="upload" aria-selected="false" data-i18n="uploadPrimaryCta">Upload Content</button>
+</div>
+</nav>
+<main id="main-content" tabindex="-1">
+<section id="home" class="section active" role="tabpanel" aria-labelledby="tab-home">
+<div class="hero">
+<h1 data-i18n="heroTitle">Upload Once. Reach Everywhere.</h1>
+<p data-i18n="heroSubtitle">A creator platform to upload, schedule and manage content across platforms.</p>
+<div class="hero-actions">
+<button class="btn btn-primary" type="button" onclick="show('upload')" data-i18n="uploadPrimaryCta">Upload Content</button>
+<button class="btn" type="button" onclick="show('connections')" data-i18n="connectPlatformsCta">Connect Platforms</button>
+</div>
+</div>
+<div class="container grid">
+<div class="card">
+<h3 data-i18n="cardUploadTitle">Upload Content</h3>
+<p data-i18n="cardUploadText">Add videos or posts to your creator library.</p>
+</div>
+<div class="card">
+<h3 data-i18n="cardScheduleTitle">Schedule Posts</h3>
+<p data-i18n="cardScheduleText">Choose exactly when your content goes live.</p>
+</div>
+<div class="card">
+<h3 data-i18n="cardPlatformsTitle">Manage Platforms</h3>
+<p data-i18n="cardPlatformsText">Control all creator accounts from one place.</p>
+</div>
+<div class="card">
+<h3 data-i18n="cardDashboardTitle">Creator Dashboard</h3>
+<p data-i18n="cardDashboardText">Track upcoming posts and manage your workflow.</p>
+</div>
+</div>
+<div class="container">
+<h3 data-i18n="toolsTitle">Your Tools</h3>
+<div class="tool-grid">
+<div class="card tool-card">
+<h4 data-i18n="navScheduler">Scheduler</h4>
+<p data-i18n="cardScheduleText">Choose exactly when your content goes live.</p>
+<button class="btn" type="button" onclick="show('scheduler')" data-i18n="openToolAction">Open Tool</button>
+</div>
+<div class="card tool-card">
+<h4 data-i18n="navLibrary">Library</h4>
+<p data-i18n="cardUploadText">Add videos or posts to your creator library.</p>
+<button class="btn" type="button" onclick="show('library')" data-i18n="openToolAction">Open Tool</button>
+</div>
+<div class="card tool-card">
+<h4 data-i18n="navConnections">Connections</h4>
+<p data-i18n="cardPlatformsText">Control all creator accounts from one place.</p>
+<button class="btn" type="button" onclick="show('connections')" data-i18n="openToolAction">Open Tool</button>
+</div>
+<div class="card tool-card">
+<h4 data-i18n="settingsTitle">Settings</h4>
+<p data-i18n="settingsOpenText">Manage language, contrast, and backup bin.</p>
+<button class="btn" type="button" onclick="show('settings')" data-i18n="openToolAction">Open Tool</button>
+</div>
+</div>
+</div>
+<div class="container">
+<h3 data-i18n="supportedPlatformsTitle">Supported Platforms</h3>
+<div class="grid">
+<div class="card"><strong>YouTube</strong></div>
+<div class="card"><strong>Instagram</strong></div>
+<div class="card"><strong>TikTok</strong></div>
+<div class="card"><strong>Facebook</strong></div>
+<div class="card"><strong>Twitter</strong></div>
+</div>
+</div>
+</section>
+<section id="dashboard" class="section" role="tabpanel" aria-labelledby="tab-dashboard">
+<div class="container">
+<h2 data-i18n="dashboardTitle">Creator Dashboard</h2>
+<p data-i18n="dashboardSubtitle">Overview of your activity.</p>
+<div class="grid">
+<div class="card">
+<h3 data-i18n="totalPostsLabel">Total Posts</h3>
+<p id="totalPosts">0</p>
+</div>
+<div class="card">
+<h3 data-i18n="scheduledPostsLabel">Scheduled Posts</h3>
+<p id="scheduledPosts">0</p>
+</div>
+<div class="card">
+<h3 data-i18n="libraryItemsLabel">Library Items</h3>
+<p id="libraryItems">0</p>
+</div>
+<div class="card">
+<h3 data-i18n="connectedPlatformsLabel">Connected Platforms</h3>
+<p id="connectedPlatforms">0</p>
+</div>
+</div>
+<div class="analytics-panel">
+<h3 data-i18n="analyticsTitle">Performance Analytics</h3>
+<p class="analytics-summary" id="analyticsSummary" data-i18n="analyticsEmpty">Load analytics to see views, likes, comments, and engagement by platform.</p>
+<button class="btn" type="button" onclick="loadAnalytics()" data-i18n="analyticsLoad">Load Analytics</button>
+<div id="analyticsTableWrap" style="margin-top:12px"></div>
+</div>
+</div>
+</section>
+<section id="connections" class="section" role="tabpanel" aria-labelledby="tab-connections">
+<div class="container">
+<h2 data-i18n="connectTitle">Connect Accounts</h2>
+<p data-i18n="connectSubtitle">Connect each platform before uploading to it.</p>
+<div class="card" style="margin-bottom:16px">
+<h3>Backend OAuth Setup</h3>
+<p style="color:var(--muted)">Set your backend base URL to enable real OAuth redirects. Leave empty to use demo mode.</p>
+<label for="backendBaseUrl">Backend base URL</label>
+<input id="backendBaseUrl" placeholder="https://your-api.example.com" autocomplete="off" />
+<button class="btn" type="button" onclick="saveIntegrationSettings()">Save OAuth Settings</button>
+</div>
+<button class="btn" type="button" onclick="verifyAllConnections()" style="margin-bottom:16px">Verify All Connections</button>
+<div id="connectionsList" class="grid"></div>
+</div>
+</section>
+<section id="upload" class="section" role="tabpanel" aria-labelledby="tab-upload">
+<div class="container upload-panel">
+<h2 data-i18n="uploadTitle">Upload Content</h2>
+<p data-i18n="uploadSubtitle">Use this larger form to quickly add content, including gaming platform posts.</p>
+<label for="title" data-i18n="contentTitleLabel">Content title</label>
+<input id="title" placeholder="Content title" autocomplete="off" />
+<label for="description" data-i18n="descriptionLabel">Description</label>
+<textarea id="description" placeholder="Description" autocomplete="off"></textarea>
+<label for="platform" data-i18n="platformLabel">Platform</label>
+<select id="platform">
+<optgroup label="Social">
+<option>YouTube</option>
+<option>Instagram</option>
+<option>TikTok</option>
+<option>X / Twitter</option>
+</optgroup>
+<optgroup label="Gaming">
+<option>Twitch</option>
+<option>Kick</option>
+<option>YouTube Gaming</option>
+</optgroup>
+</select>
+<button class="btn" onclick="addContent()" data-i18n="addToLibrary">Add To Library</button>
+<p id="uploadHelp" class="sr-only" data-i18n="uploadHelp">Enter a title, choose a platform, then activate Add To Library.</p>
+</div>
+</section>
+<section id="scheduler" class="section" role="region" aria-label="Scheduler">
+<div class="container">
+<h2 data-i18n="schedulerTitle">Schedule Content</h2>
+<label for="scheduleTitle" data-i18n="contentTitleLabel">Content title</label>
+<input id="scheduleTitle" placeholder="Content title" autocomplete="off" />
+<label for="schedulePlatforms" data-i18n="schedulePlatformsLabel">Platforms</label>
+<select id="schedulePlatforms" multiple size="7" aria-describedby="schedulePlatformHelp">
+<option>YouTube</option>
+<option>Instagram</option>
+<option>TikTok</option>
+<option>X / Twitter</option>
+<option>Twitch</option>
+<option>Kick</option>
+<option>YouTube Gaming</option>
+</select>
+<p id="schedulePlatformHelp" style="margin-top:-4px;color:var(--muted)" data-i18n="scheduleSelectHint">Choose one or more platforms (Ctrl/Cmd + click for multiple).</p>
+<label for="scheduleTime" data-i18n="publishDateTimeLabel">Publish date and time</label>
+<input type="datetime-local" id="scheduleTime" />
+<button class="btn" onclick="schedulePost()" data-i18n="schedulePost">Schedule Post</button>
+<div id="scheduleList"></div>
+</div>
+</section>
+<section id="library" class="section" role="region" aria-label="Library">
+<div class="container">
+<h2 data-i18n="libraryTitle">Content Library</h2>
+<div id="libraryList"></div>
+</div>
+</section>
+<section id="settings" class="section" role="region" aria-label="Settings">
+<div class="container">
+<h2 data-i18n="settingsTitle">Settings</h2>
+<div class="settings-grid">
+<div class="card">
+<h3 data-i18n="settingsGeneralTitle">General</h3>
+<label for="languageSelect" data-i18n="languageLabel">Language</label>
+<select id="languageSelect" aria-label="Language" onchange="setLanguage(this.value)">
+<option value="en">English</option>
+<option value="es">Espanol</option>
+<option value="fr">Francais</option>
+<option value="de">Deutsch</option>
+<option value="pt">Portugues</option>
+</select>
+<button class="btn" id="contrastToggle" type="button" onclick="toggleContrast()" aria-pressed="false" data-i18n="toggleContrast">High Contrast</button>
+</div>
+<div class="card">
+<h3 data-i18n="backupTitle">Backup Bin</h3>
+<label for="backupFilter" data-i18n="backupFilterLabel">Filter</label>
+<select id="backupFilter" onchange="setBackupFilter(this.value)">
+<option value="all" data-i18n="backupFilterAll">All</option>
+<option value="library" data-i18n="backupFilterLibrary">Library</option>
+<option value="schedule" data-i18n="backupFilterSchedule">Schedule</option>
+</select>
+<button class="btn" type="button" onclick="emptyBackupBin()" data-i18n="deletePermanentAction">Delete Permanently</button>
+<div id="backupList" style="margin-top:12px"></div>
+</div>
+</div>
+</div>
+</section>
+<div class="status" id="status" aria-live="polite">Ready.</div>
+</main>
+<div class="footer">
+<p>© 2026 Creatorverse.ai</p>
+</div>
+<script>
+const messages={
+ en:{
+   skipToMain:'Skip to main content',navHome:'Home',navDashboard:'Dashboard',navConnections:'Connections',navUpload:'Upload',navScheduler:'Scheduler',navLibrary:'Library',navBackup:'Backup Bin',toggleContrast:'High Contrast',
+  uploadPrimaryCta:'Upload Content',connectPlatformsCta:'Connect Platforms',toolsTitle:'Your Tools',openToolAction:'Open Tool',supportedPlatformsTitle:'Supported Platforms',settingsTitle:'Settings',settingsGeneralTitle:'General',languageLabel:'Language',settingsOpenText:'Manage language, contrast, and backup bin.',
+  heroTitle:'Upload Once. Reach Everywhere.',heroSubtitle:'A creator platform to upload, schedule and manage content across platforms.',
+  cardUploadTitle:'Upload Content',cardUploadText:'Add videos or posts to your creator library.',cardScheduleTitle:'Schedule Posts',cardScheduleText:'Choose exactly when your content goes live.',
+  cardPlatformsTitle:'Manage Platforms',cardPlatformsText:'Control all creator accounts from one place.',cardDashboardTitle:'Creator Dashboard',cardDashboardText:'Track upcoming posts and manage your workflow.',
+  dashboardTitle:'Creator Dashboard',dashboardSubtitle:'Overview of your activity.',totalPostsLabel:'Total Posts',scheduledPostsLabel:'Scheduled Posts',libraryItemsLabel:'Library Items',connectedPlatformsLabel:'Connected Platforms',analyticsTitle:'Performance Analytics',analyticsLoad:'Load Analytics',analyticsEmpty:'Load analytics to see views, likes, comments, and engagement by platform.',analyticsNeedBackend:'Set Backend base URL first to load analytics from connected platforms.',analyticsNoConnected:'Connect at least one platform to load analytics.',analyticsBestPlatform:'Best platform:',analyticsTopContent:'Top content:',
+   connectTitle:'Connect Accounts',connectSubtitle:'Connect each platform before uploading to it.',connectAction:'Connect',disconnectAction:'Disconnect',connectedState:'Connected',disconnectedState:'Not connected',mustConnectPrefix:'Please connect ',mustConnectSuffix:' before uploading.',
+   uploadTitle:'Upload Content',uploadSubtitle:'Use this larger form to quickly add content, including gaming platform posts.',contentTitleLabel:'Content title',descriptionLabel:'Description',platformLabel:'Platform',addToLibrary:'Add To Library',uploadHelp:'Enter a title, choose a platform, then activate Add To Library.',
+  schedulerTitle:'Schedule Content',schedulePlatformsLabel:'Platforms',scheduleSelectHint:'Choose one or more platforms (Ctrl/Cmd + click for multiple).',publishDateTimeLabel:'Publish date and time',schedulePost:'Schedule Post',libraryTitle:'Content Library',backupTitle:'Backup Bin',
+  ready:'Ready.',sectionOpened:' section opened.',needTitle:'Please enter a content title before adding to library.',needSchedule:'Please provide title, platform, and date/time to schedule.',
+  addedPrefix:'Added ',addedMiddle:' to library for ',addedSuffix:'.',scheduledPrefix:'Scheduled ',scheduledMiddle:' for ',scheduledSuffix:'.',connectedNowPrefix:'Connected ',disconnectedNowPrefix:'Disconnected ',statusSuffix:'.',verifyNeedBackend:'Add Backend base URL first, then verify connection status.',verifyCheckingPrefix:'Checking connection for ',verifyCheckingSuffix:'...',verifyFailedPrefix:'Could not verify ',verifyFailedSuffix:'. Check backend status endpoint.',disconnectFailedPrefix:'Could not disconnect ',disconnectFailedSuffix:' from backend. Try again.',
+  noContent:'No content yet. Add your first item in Upload.',noScheduled:'No scheduled posts yet.',scheduledFor:'scheduled for ',generalPlatform:'General',hideAction:'Hide',unhideAction:'Unhide',deleteAction:'Delete',restoreAction:'Restore',deletePermanentAction:'Delete Permanently',backupEmpty:'Backup bin is empty.',hiddenLibraryTitle:'Hidden Library Items',hiddenScheduleTitle:'Hidden Scheduled Items',movedToBin:'Moved to backup bin.',restoredFromBin:'Restored from backup bin.',binEmptied:'Backup bin cleared.',backupFilterLabel:'Filter',backupFilterAll:'All',backupFilterLibrary:'Library',backupFilterSchedule:'Schedule',confirmDeleteItem:'Delete this item and move it to backup bin?',confirmDeletePermanentItem:'Delete this item permanently from backup bin?',confirmEmptyBin:'Delete all items permanently from backup bin?'
+ },
+ es:{
+   skipToMain:'Saltar al contenido principal',navHome:'Inicio',navDashboard:'Panel',navConnections:'Conexiones',navUpload:'Subir',navScheduler:'Programar',navLibrary:'Biblioteca',toggleContrast:'Alto Contraste',
+  heroTitle:'Sube una vez. Llega a todas partes.',heroSubtitle:'Una plataforma para subir, programar y gestionar contenido en varias plataformas.',
+  cardUploadTitle:'Subir contenido',cardUploadText:'Agrega videos o publicaciones a tu biblioteca.',cardScheduleTitle:'Programar publicaciones',cardScheduleText:'Elige exactamente cuando se publica tu contenido.',
+  cardPlatformsTitle:'Gestionar plataformas',cardPlatformsText:'Controla todas tus cuentas desde un solo lugar.',cardDashboardTitle:'Panel del creador',cardDashboardText:'Sigue publicaciones futuras y organiza tu flujo de trabajo.',
+  dashboardTitle:'Panel del creador',dashboardSubtitle:'Resumen de tu actividad.',totalPostsLabel:'Publicaciones totales',scheduledPostsLabel:'Publicaciones programadas',libraryItemsLabel:'Elementos de biblioteca',connectedPlatformsLabel:'Plataformas conectadas',
+   connectTitle:'Conectar cuentas',connectSubtitle:'Conecta cada plataforma antes de subir contenido.',connectAction:'Conectar',disconnectAction:'Desconectar',connectedState:'Conectado',disconnectedState:'No conectado',mustConnectPrefix:'Conecta ',mustConnectSuffix:' antes de subir.',
+   uploadTitle:'Subir contenido',uploadSubtitle:'Usa este formulario mas grande para agregar contenido rapido, incluyendo plataformas gaming.',contentTitleLabel:'Titulo del contenido',descriptionLabel:'Descripcion',platformLabel:'Plataforma',addToLibrary:'Agregar a biblioteca',uploadHelp:'Escribe un titulo, elige una plataforma y activa Agregar a biblioteca.',
+  schedulerTitle:'Programar contenido',schedulePlatformsLabel:'Plataformas',scheduleSelectHint:'Elige una o mas plataformas (Ctrl/Cmd + clic para multiples).',publishDateTimeLabel:'Fecha y hora de publicacion',schedulePost:'Programar publicacion',libraryTitle:'Biblioteca de contenido',
+  ready:'Listo.',sectionOpened:' abierta.',needTitle:'Ingresa un titulo antes de agregar a la biblioteca.',needSchedule:'Completa titulo, plataforma y fecha/hora para programar.',
+  addedPrefix:'Se agrego ',addedMiddle:' a la biblioteca para ',addedSuffix:'.',scheduledPrefix:'Se programo ',scheduledMiddle:' para ',scheduledSuffix:'.',connectedNowPrefix:'Conectado ',disconnectedNowPrefix:'Desconectado ',statusSuffix:'.',verifyNeedBackend:'Agrega la URL base del backend primero para verificar.',verifyCheckingPrefix:'Verificando conexion de ',verifyCheckingSuffix:'...',verifyFailedPrefix:'No se pudo verificar ',verifyFailedSuffix:'. Revisa el endpoint del backend.',disconnectFailedPrefix:'No se pudo desconectar ',disconnectFailedSuffix:' del backend. Intenta de nuevo.',
+  noContent:'Todavia no hay contenido. Agrega el primero en Subir.',noScheduled:'Todavia no hay publicaciones programadas.',scheduledFor:'programado para ',generalPlatform:'General',
+  uploadPrimaryCta:'Subir contenido',connectPlatformsCta:'Conectar plataformas',toolsTitle:'Tus herramientas',openToolAction:'Abrir herramienta',supportedPlatformsTitle:'Plataformas compatibles',settingsTitle:'Configuracion',settingsGeneralTitle:'General',languageLabel:'Idioma',settingsOpenText:'Gestiona idioma, contraste y papelera de respaldo.',
+  analyticsTitle:'Analiticas de rendimiento',analyticsLoad:'Cargar analiticas',analyticsEmpty:'Carga analiticas para ver vistas, me gusta, comentarios e interaccion por plataforma.',analyticsNeedBackend:'Define primero la URL base del backend para cargar analiticas de plataformas conectadas.',analyticsNoConnected:'Conecta al menos una plataforma para cargar analiticas.',analyticsBestPlatform:'Mejor plataforma:',analyticsTopContent:'Contenido principal:',
+  hideAction:'Ocultar',unhideAction:'Mostrar',deleteAction:'Eliminar',restoreAction:'Restaurar',deletePermanentAction:'Eliminar permanentemente',backupTitle:'Papelera de respaldo',backupEmpty:'La papelera de respaldo esta vacia.',hiddenLibraryTitle:'Elementos ocultos de la biblioteca',hiddenScheduleTitle:'Elementos programados ocultos',movedToBin:'Movido a la papelera de respaldo.',restoredFromBin:'Restaurado desde la papelera de respaldo.',binEmptied:'Papelera de respaldo vaciada.',backupFilterLabel:'Filtro',backupFilterAll:'Todo',backupFilterLibrary:'Biblioteca',backupFilterSchedule:'Programados',confirmDeleteItem:'¿Eliminar este elemento y moverlo a la papelera de respaldo?',confirmDeletePermanentItem:'¿Eliminar este elemento permanentemente de la papelera de respaldo?',confirmEmptyBin:'¿Eliminar permanentemente todos los elementos de la papelera de respaldo?'
+ },
+ fr:{
+      skipToMain:'Aller au contenu principal',navHome:'Accueil',navDashboard:'Tableau',navConnections:'Connexions',navUpload:'Televerser',navScheduler:'Planifier',navLibrary:'Bibliotheque',toggleContrast:'Contraste eleve',
+    heroTitle:'Televersez une fois. Atteignez partout.',heroSubtitle:'Une plateforme pour televerser, planifier et gerer du contenu sur plusieurs plateformes.',
+    cardUploadTitle:'Televerser du contenu',cardUploadText:'Ajoutez des videos ou des publications a votre bibliotheque.',cardScheduleTitle:'Planifier des publications',cardScheduleText:'Choisissez exactement quand votre contenu est publie.',
+    cardPlatformsTitle:'Gerer les plateformes',cardPlatformsText:'Controlez tous vos comptes depuis un seul endroit.',cardDashboardTitle:'Tableau createur',cardDashboardText:'Suivez les publications a venir et organisez votre flux de travail.',
+    dashboardTitle:'Tableau createur',dashboardSubtitle:'Apercu de votre activite.',totalPostsLabel:'Publications totales',scheduledPostsLabel:'Publications planifiees',libraryItemsLabel:'Elements de bibliotheque',connectedPlatformsLabel:'Plateformes connectees',
+    connectTitle:'Connecter les comptes',connectSubtitle:'Connectez chaque plateforme avant de televerser du contenu.',connectAction:'Connecter',disconnectAction:'Deconnecter',connectedState:'Connecte',disconnectedState:'Non connecte',mustConnectPrefix:'Veuillez connecter ',mustConnectSuffix:' avant de televerser.',
+   uploadTitle:'Televerser du contenu',uploadSubtitle:'Utilisez ce grand formulaire pour ajouter du contenu rapidement, y compris des plateformes gaming.',contentTitleLabel:'Titre du contenu',descriptionLabel:'Description',platformLabel:'Plateforme',addToLibrary:'Ajouter a la bibliotheque',uploadHelp:'Saisissez un titre, choisissez une plateforme puis activez Ajouter a la bibliotheque.',
+    schedulerTitle:'Planifier du contenu',schedulePlatformsLabel:'Plateformes',scheduleSelectHint:'Choisissez une ou plusieurs plateformes (Ctrl/Cmd + clic pour multiple).',publishDateTimeLabel:'Date et heure de publication',schedulePost:'Planifier la publication',libraryTitle:'Bibliotheque de contenu',
+    ready:'Pret.',sectionOpened:' ouverte.',needTitle:'Saisissez un titre avant d ajouter a la bibliotheque.',needSchedule:'Saisissez titre, plateforme et date/heure pour planifier.',
+      addedPrefix:'Ajoute ',addedMiddle:' a la bibliotheque pour ',addedSuffix:'.',scheduledPrefix:'Planifie ',scheduledMiddle:' pour ',scheduledSuffix:'.',connectedNowPrefix:'Connecte ',disconnectedNowPrefix:'Deconnecte ',statusSuffix:'.',verifyNeedBackend:'Ajoutez d abord l URL backend pour verifier.',verifyCheckingPrefix:'Verification de connexion pour ',verifyCheckingSuffix:'...',verifyFailedPrefix:'Impossible de verifier ',verifyFailedSuffix:'. Verifiez le endpoint backend.',disconnectFailedPrefix:'Impossible de deconnecter ',disconnectFailedSuffix:' du backend. Reessayez.',
+    noContent:'Pas encore de contenu. Ajoutez le premier dans Televerser.',noScheduled:'Aucune publication planifiee.',scheduledFor:'planifie pour ',generalPlatform:'General',
+    uploadPrimaryCta:'Televerser du contenu',connectPlatformsCta:'Connecter des plateformes',toolsTitle:'Vos outils',openToolAction:'Ouvrir l outil',supportedPlatformsTitle:'Plateformes prises en charge',settingsTitle:'Parametres',settingsGeneralTitle:'General',languageLabel:'Langue',settingsOpenText:'Gerez la langue, le contraste et la corbeille de sauvegarde.',
+    analyticsTitle:'Analyses de performance',analyticsLoad:'Charger les analyses',analyticsEmpty:'Chargez les analyses pour voir vues, mentions J aime, commentaires et engagement par plateforme.',analyticsNeedBackend:'Definissez d abord l URL backend pour charger les analyses des plateformes connectees.',analyticsNoConnected:'Connectez au moins une plateforme pour charger les analyses.',analyticsBestPlatform:'Meilleure plateforme :',analyticsTopContent:'Contenu principal :',
+    hideAction:'Masquer',unhideAction:'Afficher',deleteAction:'Supprimer',restoreAction:'Restaurer',deletePermanentAction:'Supprimer definitivement',backupTitle:'Corbeille de sauvegarde',backupEmpty:'La corbeille de sauvegarde est vide.',hiddenLibraryTitle:'Elements de bibliotheque masques',hiddenScheduleTitle:'Elements planifies masques',movedToBin:'Deplace vers la corbeille de sauvegarde.',restoredFromBin:'Restaure depuis la corbeille de sauvegarde.',binEmptied:'Corbeille de sauvegarde videe.',backupFilterLabel:'Filtre',backupFilterAll:'Tous',backupFilterLibrary:'Bibliotheque',backupFilterSchedule:'Planification',confirmDeleteItem:'Supprimer cet element et le deplacer vers la corbeille de sauvegarde ?',confirmDeletePermanentItem:'Supprimer cet element definitivement de la corbeille de sauvegarde ?',confirmEmptyBin:'Supprimer definitivement tous les elements de la corbeille de sauvegarde ?'
+ },
+ de:{
+   skipToMain:'Zum Hauptinhalt springen',navHome:'Start',navDashboard:'Dashboard',navConnections:'Verbindungen',navUpload:'Hochladen',navScheduler:'Planen',navLibrary:'Bibliothek',toggleContrast:'Hoher Kontrast',
+  heroTitle:'Einmal hochladen. Uberall erreichen.',heroSubtitle:'Eine Plattform zum Hochladen, Planen und Verwalten von Inhalten auf mehreren Plattformen.',
+  cardUploadTitle:'Inhalt hochladen',cardUploadText:'Fuge Videos oder Beitrage zu deiner Bibliothek hinzu.',cardScheduleTitle:'Beitrage planen',cardScheduleText:'Lege genau fest, wann dein Inhalt veroffentlicht wird.',
+  cardPlatformsTitle:'Plattformen verwalten',cardPlatformsText:'Verwalte alle Konten an einem Ort.',cardDashboardTitle:'Creator Dashboard',cardDashboardText:'Behalte geplante Beitrage im Blick und organisiere deinen Workflow.',
+  dashboardTitle:'Creator Dashboard',dashboardSubtitle:'Ubersicht deiner Aktivitat.',totalPostsLabel:'Gesamte Beitrage',scheduledPostsLabel:'Geplante Beitrage',libraryItemsLabel:'Bibliothekseintrage',connectedPlatformsLabel:'Verbundene Plattformen',
+   connectTitle:'Konten verbinden',connectSubtitle:'Verbinde jede Plattform vor dem Hochladen.',connectAction:'Verbinden',disconnectAction:'Trennen',connectedState:'Verbunden',disconnectedState:'Nicht verbunden',mustConnectPrefix:'Bitte verbinde ',mustConnectSuffix:' vor dem Hochladen.',
+   uploadTitle:'Inhalt hochladen',uploadSubtitle:'Nutze dieses groessere Formular fur schnelles Hinzufugen, auch fur Gaming-Plattformen.',contentTitleLabel:'Inhaltstitel',descriptionLabel:'Beschreibung',platformLabel:'Plattform',addToLibrary:'Zur Bibliothek hinzufugen',uploadHelp:'Titel eingeben, Plattform auswahlen und Zur Bibliothek hinzufugen aktivieren.',
+  schedulerTitle:'Inhalt planen',schedulePlatformsLabel:'Plattformen',scheduleSelectHint:'Eine oder mehrere Plattformen wahlen (Ctrl/Cmd + Klick fur mehrere).',publishDateTimeLabel:'Datum und Uhrzeit',schedulePost:'Beitrag planen',libraryTitle:'Inhaltsbibliothek',
+  ready:'Bereit.',sectionOpened:' geoffnet.',needTitle:'Bitte einen Titel eingeben, bevor du zur Bibliothek hinzufugst.',needSchedule:'Bitte Titel, Plattform und Datum/Uhrzeit eingeben.',
+  addedPrefix:'Hinzugefugt: ',addedMiddle:' zur Bibliothek fur ',addedSuffix:'.',scheduledPrefix:'Geplant: ',scheduledMiddle:' fur ',scheduledSuffix:'.',connectedNowPrefix:'Verbunden ',disconnectedNowPrefix:'Getrennt ',statusSuffix:'.',verifyNeedBackend:'Bitte zuerst die Backend-Basis-URL eintragen.',verifyCheckingPrefix:'Prufe Verbindung fur ',verifyCheckingSuffix:'...',verifyFailedPrefix:'Konnte ',verifyFailedSuffix:' nicht verifizieren. Backend-Endpoint prufen.',disconnectFailedPrefix:'Konnte ',disconnectFailedSuffix:' nicht im Backend trennen. Bitte erneut versuchen.',
+  noContent:'Noch kein Inhalt. Fuge den ersten unter Hochladen hinzu.',noScheduled:'Noch keine geplanten Beitrage.',scheduledFor:'geplant fur ',generalPlatform:'Allgemein',
+  uploadPrimaryCta:'Inhalt hochladen',connectPlatformsCta:'Plattformen verbinden',toolsTitle:'Deine Tools',openToolAction:'Tool offnen',supportedPlatformsTitle:'Unterstutzte Plattformen',settingsTitle:'Einstellungen',settingsGeneralTitle:'Allgemein',languageLabel:'Sprache',settingsOpenText:'Verwalte Sprache, Kontrast und Backup-Papierkorb.',
+  analyticsTitle:'Leistungsanalysen',analyticsLoad:'Analysen laden',analyticsEmpty:'Lade Analysen, um Aufrufe, Likes, Kommentare und Engagement je Plattform zu sehen.',analyticsNeedBackend:'Bitte zuerst die Backend-Basis-URL festlegen, um Analysen verbundener Plattformen zu laden.',analyticsNoConnected:'Verbinde mindestens eine Plattform, um Analysen zu laden.',analyticsBestPlatform:'Beste Plattform:',analyticsTopContent:'Top-Inhalt:',
+  hideAction:'Ausblenden',unhideAction:'Einblenden',deleteAction:'Loschen',restoreAction:'Wiederherstellen',deletePermanentAction:'Dauerhaft loschen',backupTitle:'Backup-Papierkorb',backupEmpty:'Der Backup-Papierkorb ist leer.',hiddenLibraryTitle:'Versteckte Bibliothekseintrage',hiddenScheduleTitle:'Versteckte geplante Eintrage',movedToBin:'In den Backup-Papierkorb verschoben.',restoredFromBin:'Aus dem Backup-Papierkorb wiederhergestellt.',binEmptied:'Backup-Papierkorb geleert.',backupFilterLabel:'Filter',backupFilterAll:'Alle',backupFilterLibrary:'Bibliothek',backupFilterSchedule:'Planung',confirmDeleteItem:'Dieses Element loschen und in den Backup-Papierkorb verschieben?',confirmDeletePermanentItem:'Dieses Element dauerhaft aus dem Backup-Papierkorb loschen?',confirmEmptyBin:'Alle Elemente im Backup-Papierkorb dauerhaft loschen?'
+ },
+ pt:{
+   skipToMain:'Ir para o conteudo principal',navHome:'Inicio',navDashboard:'Painel',navConnections:'Conexoes',navUpload:'Upload',navScheduler:'Agendador',navLibrary:'Biblioteca',toggleContrast:'Alto Contraste',
+  heroTitle:'Envie uma vez. Alcance todos os lugares.',heroSubtitle:'Uma plataforma para enviar, agendar e gerenciar conteudo em varias plataformas.',
+  cardUploadTitle:'Enviar conteudo',cardUploadText:'Adicione videos ou posts a sua biblioteca.',cardScheduleTitle:'Agendar posts',cardScheduleText:'Escolha exatamente quando seu conteudo sera publicado.',
+  cardPlatformsTitle:'Gerenciar plataformas',cardPlatformsText:'Controle todas as contas em um so lugar.',cardDashboardTitle:'Painel do criador',cardDashboardText:'Acompanhe publicacoes futuras e organize seu fluxo de trabalho.',
+  dashboardTitle:'Painel do criador',dashboardSubtitle:'Visao geral da sua atividade.',totalPostsLabel:'Total de posts',scheduledPostsLabel:'Posts agendados',libraryItemsLabel:'Itens da biblioteca',connectedPlatformsLabel:'Plataformas conectadas',
+   connectTitle:'Conectar contas',connectSubtitle:'Conecte cada plataforma antes de enviar conteudo.',connectAction:'Conectar',disconnectAction:'Desconectar',connectedState:'Conectado',disconnectedState:'Nao conectado',mustConnectPrefix:'Conecte ',mustConnectSuffix:' antes de enviar.',
+   uploadTitle:'Enviar conteudo',uploadSubtitle:'Use este formulario maior para adicionar conteudo rapido, incluindo plataformas de jogos.',contentTitleLabel:'Titulo do conteudo',descriptionLabel:'Descricao',platformLabel:'Plataforma',addToLibrary:'Adicionar a biblioteca',uploadHelp:'Digite um titulo, escolha uma plataforma e ative Adicionar a biblioteca.',
+  schedulerTitle:'Agendar conteudo',schedulePlatformsLabel:'Plataformas',scheduleSelectHint:'Escolha uma ou mais plataformas (Ctrl/Cmd + clique para varias).',publishDateTimeLabel:'Data e hora de publicacao',schedulePost:'Agendar post',libraryTitle:'Biblioteca de conteudo',
+  ready:'Pronto.',sectionOpened:' aberta.',needTitle:'Digite um titulo antes de adicionar a biblioteca.',needSchedule:'Preencha titulo, plataforma e data/hora para agendar.',
+  addedPrefix:'Adicionado ',addedMiddle:' a biblioteca para ',addedSuffix:'.',scheduledPrefix:'Agendado ',scheduledMiddle:' para ',scheduledSuffix:'.',connectedNowPrefix:'Conectado ',disconnectedNowPrefix:'Desconectado ',statusSuffix:'.',verifyNeedBackend:'Adicione primeiro a URL base do backend para verificar.',verifyCheckingPrefix:'Verificando conexao de ',verifyCheckingSuffix:'...',verifyFailedPrefix:'Nao foi possivel verificar ',verifyFailedSuffix:'. Verifique o endpoint do backend.',disconnectFailedPrefix:'Nao foi possivel desconectar ',disconnectFailedSuffix:' no backend. Tente novamente.',
+  noContent:'Ainda nao ha conteudo. Adicione o primeiro em Upload.',noScheduled:'Ainda nao ha posts agendados.',scheduledFor:'agendado para ',generalPlatform:'Geral',
+  uploadPrimaryCta:'Enviar conteudo',connectPlatformsCta:'Conectar plataformas',toolsTitle:'Suas ferramentas',openToolAction:'Abrir ferramenta',supportedPlatformsTitle:'Plataformas suportadas',settingsTitle:'Configuracoes',settingsGeneralTitle:'Geral',languageLabel:'Idioma',settingsOpenText:'Gerencie idioma, contraste e lixeira de backup.',
+  analyticsTitle:'Analises de desempenho',analyticsLoad:'Carregar analises',analyticsEmpty:'Carregue analises para ver visualizacoes, curtidas, comentarios e engajamento por plataforma.',analyticsNeedBackend:'Defina primeiro a URL base do backend para carregar analises das plataformas conectadas.',analyticsNoConnected:'Conecte pelo menos uma plataforma para carregar analises.',analyticsBestPlatform:'Melhor plataforma:',analyticsTopContent:'Conteudo principal:',
+  hideAction:'Ocultar',unhideAction:'Mostrar',deleteAction:'Excluir',restoreAction:'Restaurar',deletePermanentAction:'Excluir permanentemente',backupTitle:'Lixeira de backup',backupEmpty:'A lixeira de backup esta vazia.',hiddenLibraryTitle:'Itens ocultos da biblioteca',hiddenScheduleTitle:'Itens agendados ocultos',movedToBin:'Movido para a lixeira de backup.',restoredFromBin:'Restaurado da lixeira de backup.',binEmptied:'Lixeira de backup esvaziada.',backupFilterLabel:'Filtro',backupFilterAll:'Todos',backupFilterLibrary:'Biblioteca',backupFilterSchedule:'Agendados',confirmDeleteItem:'Excluir este item e mover para a lixeira de backup?',confirmDeletePermanentItem:'Excluir este item permanentemente da lixeira de backup?',confirmEmptyBin:'Excluir permanentemente todos os itens da lixeira de backup?'
+ }
+};
+
+function detectBrowserLanguage(){
+ const supported=['en','es','fr','de','pt'];
+ const langs=(navigator.languages&&navigator.languages.length?navigator.languages:[navigator.language]).filter(Boolean);
+ for(const lang of langs){
+    const normalized=lang.toLowerCase();
+    const base=normalized.split('-')[0];
+    if(supported.includes(base)) return base;
+ }
+ return 'en';
+}
+
+let language=localStorage.getItem('language')||detectBrowserLanguage();
+let contrast=localStorage.getItem('contrast')||'normal';
+let library=JSON.parse(localStorage.getItem('library')||'[]');
+let schedules=JSON.parse(localStorage.getItem('schedules')||'[]');
+let backupBin=JSON.parse(localStorage.getItem('backupBin')||'[]');
+let backupFilter=localStorage.getItem('backupFilter')||'all';
+const platformCatalog=['YouTube','Instagram','TikTok','X / Twitter','Twitch','Kick','YouTube Gaming'];
+const platformSlugs={'YouTube':'youtube','Instagram':'instagram','TikTok':'tiktok','X / Twitter':'x','Twitch':'twitch','Kick':'kick','YouTube Gaming':'youtube-gaming'};
+const platformBySlug=Object.fromEntries(Object.entries(platformSlugs).map(([name,slug])=>[slug,name]));
+let connections=JSON.parse(localStorage.getItem('connections')||'{}');
+let connectionMeta=JSON.parse(localStorage.getItem('connectionMeta')||'{}');
+let integrationSettings=JSON.parse(localStorage.getItem('integrationSettings')||'{"backendBaseUrl":""}');
+let analyticsResults=[];
+
+function nextId(prefix){
+ return prefix+'-'+Date.now()+'-'+Math.floor(Math.random()*1000000);
+}
+
+function normalizeDataState(){
+ library=(library||[]).map(item=>({
+  ...item,
+  id:item&&item.id?item.id:nextId('lib'),
+  hidden:!!(item&&item.hidden)
+ }));
+ schedules=(schedules||[]).map(item=>({
+  ...item,
+  id:item&&item.id?item.id:nextId('sch'),
+  hidden:!!(item&&item.hidden)
+ }));
+ backupBin=(backupBin||[]).map(item=>({
+  ...item,
+  id:item&&item.id?item.id:nextId('bin')
+ }));
+}
+
+function normalizeConnections(){
+ platformCatalog.forEach(platform=>{
+  if(typeof connections[platform]!=='boolean') connections[platform]=false;
+  if(!connectionMeta[platform]||typeof connectionMeta[platform]!=='object'){
+   connectionMeta[platform]={source:'manual',checkedAt:null};
+  }
+ });
+ localStorage.setItem('connections',JSON.stringify(connections));
+ localStorage.setItem('connectionMeta',JSON.stringify(connectionMeta));
+}
+
+function t(key){
+ return (messages[language]&&messages[language][key])||messages.en[key]||key;
+}
+
+function applyTranslations(){
+ document.documentElement.lang=language;
+ document.querySelectorAll('[data-i18n]').forEach(el=>{
+  const key=el.getAttribute('data-i18n');
+  el.textContent=t(key);
+ });
+ document.getElementById('backupFilter').value=backupFilter;
+ document.getElementById('title').placeholder=t('contentTitleLabel');
+ document.getElementById('description').placeholder=t('descriptionLabel');
+ document.getElementById('scheduleTitle').placeholder=t('contentTitleLabel');
+ document.getElementById('status').textContent=t('ready');
+ renderConnections();
+ renderLibrary();
+ renderSchedules();
+ renderBackupBin();
+ renderAnalytics();
+}
+
+function setLanguage(next){
+ language=next;
+ localStorage.setItem('language',language);
+ applyTranslations();
+ announce(t('ready'));
+}
+
+function applyContrast(){
+ document.body.setAttribute('data-contrast',contrast==='high'?'high':'normal');
+ const btn=document.getElementById('contrastToggle');
+ const pressed=contrast==='high';
+ btn.setAttribute('aria-pressed',pressed?'true':'false');
+}
+
+function toggleContrast(){
+ contrast=contrast==='high'?'normal':'high';
+ localStorage.setItem('contrast',contrast);
+ applyContrast();
+ announce(t('ready'));
+}
+
+function announce(message){
+ document.getElementById('status').textContent=message;
+}
+
+function setBackupFilter(value){
+ backupFilter=['all','library','schedule'].includes(value)?value:'all';
+ localStorage.setItem('backupFilter',backupFilter);
+ renderBackupBin();
+}
+
+function show(section){
+ document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+ document.getElementById(section).classList.add('active');
+ document.querySelectorAll('[role="tab"]').forEach(t=>t.setAttribute('aria-selected','false'));
+ const activeTab=document.getElementById('tab-'+section);
+ if(activeTab){
+  activeTab.setAttribute('aria-selected','true');
+  activeTab.focus();
+ }
+ document.querySelector('nav').classList.remove('menu-open');
+ announce(section.charAt(0).toUpperCase()+section.slice(1)+t('sectionOpened'));
+ updateStats();
+ if(section==='dashboard') renderAnalytics();
+}
+
+function toggleMenu(){
+ document.querySelector('nav').classList.toggle('menu-open');
+}
+
+async function loadAnalytics(){
+ const connectedPlatforms=platformCatalog.filter(isConnected);
+ if(!connectedPlatforms.length){
+  announce(t('analyticsNoConnected'));
+  return;
+ }
+
+ const base=(integrationSettings.backendBaseUrl||'').trim().replace(/\/$/,'');
+ if(!base){
+  announce(t('analyticsNeedBackend'));
+  return;
+ }
+
+ const results=[];
+ for(const platform of connectedPlatforms){
+  const slug=platformSlugs[platform]||platform.toLowerCase().replace(/[^a-z0-9]+/g,'-');
+  try{
+   const response=await fetch(base+'/analytics/'+slug+'/content',{method:'GET',credentials:'include'});
+   if(!response.ok) continue;
+   const data=await response.json();
+   (data.items||[]).forEach(item=>{
+    const views=Number(item.views||0);
+    const likes=Number(item.likes||0);
+    const comments=Number(item.comments||0);
+    const shares=Number(item.shares||0);
+    const engagementRate=views?(((likes+comments+shares)/views)*100):0;
+    results.push({
+     platform:platform,
+     title:String(item.title||'Untitled'),
+     views,likes,comments,shares,
+     engagementRate
+    });
+   });
+  }catch(error){
+   continue;
+  }
+ }
+
+ analyticsResults=results;
+ renderAnalytics();
+ announce(results.length?'Analytics loaded from connected platforms.':'No analytics data returned yet.');
+}
+
+function renderAnalytics(){
+ const summary=document.getElementById('analyticsSummary');
+ const wrap=document.getElementById('analyticsTableWrap');
+ if(!summary||!wrap) return;
+
+ if(!analyticsResults.length){
+  summary.textContent=t('analyticsEmpty');
+  wrap.innerHTML='';
+  return;
+ }
+
+ const byPlatform={};
+ analyticsResults.forEach(item=>{
+  if(!byPlatform[item.platform]) byPlatform[item.platform]={views:0,engagement:0,count:0};
+  byPlatform[item.platform].views+=item.views;
+  byPlatform[item.platform].engagement+=item.engagementRate;
+  byPlatform[item.platform].count+=1;
+ });
+
+ const bestPlatform=Object.entries(byPlatform)
+  .map(([platform,data])=>({platform,avgEngagement:data.count?(data.engagement/data.count):0}))
+  .sort((a,b)=>b.avgEngagement-a.avgEngagement)[0];
+ const topContent=analyticsResults.slice().sort((a,b)=>b.views-a.views)[0];
+
+ summary.textContent=t('analyticsBestPlatform')+' '+bestPlatform.platform+' | '+t('analyticsTopContent')+' '+topContent.title;
+
+ let table='<table class="analytics-table"><thead><tr><th>Platform</th><th>Title</th><th>Views</th><th>Likes</th><th>Comments</th><th>Shares</th><th>Engagement %</th></tr></thead><tbody>';
+ analyticsResults.slice().sort((a,b)=>b.views-a.views).forEach(item=>{
+  table+='<tr>'+
+   '<td>'+item.platform+'</td>'+
+   '<td>'+item.title+'</td>'+
+   '<td>'+item.views.toLocaleString()+'</td>'+
+   '<td>'+item.likes.toLocaleString()+'</td>'+
+   '<td>'+item.comments.toLocaleString()+'</td>'+
+   '<td>'+item.shares.toLocaleString()+'</td>'+
+   '<td>'+item.engagementRate.toFixed(2)+'</td>'+
+  '</tr>';
+ });
+ table+='</tbody></table>';
+ wrap.innerHTML=table;
+}
+
+function save(){
+ localStorage.setItem('library',JSON.stringify(library));
+ localStorage.setItem('schedules',JSON.stringify(schedules));
+ localStorage.setItem('backupBin',JSON.stringify(backupBin));
+}
+
+function moveToBackupBin(kind,item){
+ backupBin.unshift({
+  id:nextId('bin'),
+  kind,
+  item,
+  deletedAt:new Date().toISOString()
+ });
+}
+
+function setLibraryHidden(id,hidden){
+ const item=library.find(entry=>entry.id===id);
+ if(!item) return;
+ item.hidden=!!hidden;
+ save();
+ renderLibrary();
+ announce(hidden?('Library item hidden.'):('Library item visible.'));
+}
+
+function setScheduleHidden(id,hidden){
+ const item=schedules.find(entry=>entry.id===id);
+ if(!item) return;
+ item.hidden=!!hidden;
+ save();
+ renderSchedules();
+ announce(hidden?('Scheduled item hidden.'):('Scheduled item visible.'));
+}
+
+function deleteLibraryItem(id){
+ if(!window.confirm(t('confirmDeleteItem'))) return;
+ const index=library.findIndex(entry=>entry.id===id);
+ if(index===-1) return;
+ const removed=library.splice(index,1)[0];
+ moveToBackupBin('library',removed);
+ save();
+ renderLibrary();
+ renderBackupBin();
+ updateStats();
+ announce(t('movedToBin'));
+}
+
+function deleteScheduleItem(id){
+ if(!window.confirm(t('confirmDeleteItem'))) return;
+ const index=schedules.findIndex(entry=>entry.id===id);
+ if(index===-1) return;
+ const removed=schedules.splice(index,1)[0];
+ moveToBackupBin('schedule',removed);
+ save();
+ renderSchedules();
+ renderBackupBin();
+ updateStats();
+ announce(t('movedToBin'));
+}
+
+function restoreFromBackupBin(id){
+ const index=backupBin.findIndex(entry=>entry.id===id);
+ if(index===-1) return;
+ const record=backupBin.splice(index,1)[0];
+ if(record.kind==='library') library.push(record.item);
+ if(record.kind==='schedule') schedules.push(record.item);
+ save();
+ renderLibrary();
+ renderSchedules();
+ renderBackupBin();
+ updateStats();
+ announce(t('restoredFromBin'));
+}
+
+function deleteFromBackupBin(id){
+ if(!window.confirm(t('confirmDeletePermanentItem'))) return;
+ const index=backupBin.findIndex(entry=>entry.id===id);
+ if(index===-1) return;
+ backupBin.splice(index,1);
+ save();
+ renderBackupBin();
+}
+
+function emptyBackupBin(){
+ if(!backupBin.length){
+  announce(t('backupEmpty'));
+  return;
+ }
+ if(!window.confirm(t('confirmEmptyBin'))) return;
+ backupBin=[];
+ save();
+ renderBackupBin();
+ announce(t('binEmptied'));
+}
+
+function saveConnections(){
+ localStorage.setItem('connections',JSON.stringify(connections));
+}
+
+function saveConnectionMeta(){
+ localStorage.setItem('connectionMeta',JSON.stringify(connectionMeta));
+}
+
+function isConnected(platform){
+ return !!connections[platform];
+}
+
+function setConnectionState(platform,connected,source){
+ connections[platform]=!!connected;
+ connectionMeta[platform]={
+  source:source||'manual',
+  checkedAt:new Date().toISOString()
+ };
+ saveConnections();
+ saveConnectionMeta();
+}
+
+function formatCheckedAt(checkedAt){
+ if(!checkedAt) return 'Never checked';
+ const asDate=new Date(checkedAt);
+ if(Number.isNaN(asDate.getTime())) return 'Never checked';
+ return asDate.toLocaleString();
+}
+
+function sourceLabel(source){
+ if(source==='verified') return 'Verified by API';
+ if(source==='oauth') return 'Connected by OAuth callback';
+ return 'Manual/demo state';
+}
+
+function getOauthStartUrl(platform){
+ const base=(integrationSettings.backendBaseUrl||'').trim().replace(/\/$/,'');
+ if(!base) return '';
+ const slug=platformSlugs[platform]||platform.toLowerCase().replace(/[^a-z0-9]+/g,'-');
+ const redirect=encodeURIComponent(window.location.origin+window.location.pathname);
+ return base+'/oauth/'+slug+'/start?redirect_uri='+redirect;
+}
+
+function saveIntegrationSettings(){
+ integrationSettings.backendBaseUrl=document.getElementById('backendBaseUrl').value.trim();
+ localStorage.setItem('integrationSettings',JSON.stringify(integrationSettings));
+ announce(integrationSettings.backendBaseUrl?'OAuth settings saved.':'Using demo connect mode.');
+}
+
+function toggleConnection(platform){
+ const oauthUrl=getOauthStartUrl(platform);
+ if(oauthUrl && !isConnected(platform)){
+  window.open(oauthUrl,'_blank','noopener');
+  announce('Opening OAuth for '+platform+'. Complete authentication in the new tab, then return and mark as connected.');
+  return;
+ }
+ if(isConnected(platform)){
+  disconnectPlatform(platform);
+  return;
+ }
+ setConnectionState(platform,true,'manual');
+ renderConnections();
+ updateStats();
+ announce(t('connectedNowPrefix')+platform+t('statusSuffix'));
+}
+
+async function disconnectPlatform(platform){
+ const base=(integrationSettings.backendBaseUrl||'').trim().replace(/\/$/,'');
+ if(base){
+  const slug=platformSlugs[platform]||platform.toLowerCase().replace(/[^a-z0-9]+/g,'-');
+  try{
+   const response=await fetch(base+'/oauth/'+slug+'/disconnect',{method:'POST',credentials:'include'});
+   if(!response.ok) throw new Error('Status '+response.status);
+  }catch(error){
+   announce(t('disconnectFailedPrefix')+platform+t('disconnectFailedSuffix'));
+   return;
+  }
+ }
+ setConnectionState(platform,false,base?'verified':'manual');
+ renderConnections();
+ updateStats();
+ announce(t('disconnectedNowPrefix')+platform+t('statusSuffix'));
+}
+
+async function verifyConnection(platform){
+ const base=(integrationSettings.backendBaseUrl||'').trim().replace(/\/$/,'');
+ if(!base){
+  announce(t('verifyNeedBackend'));
+  return;
+ }
+ const slug=platformSlugs[platform]||platform.toLowerCase().replace(/[^a-z0-9]+/g,'-');
+ const statusUrl=base+'/oauth/'+slug+'/status';
+
+ try{
+  announce(t('verifyCheckingPrefix')+platform+t('verifyCheckingSuffix'));
+  const response=await fetch(statusUrl,{method:'GET',credentials:'include'});
+  if(!response.ok) throw new Error('Status '+response.status);
+  const data=await response.json();
+  const connected=!!(data&&data.connected===true);
+  setConnectionState(platform,connected,'verified');
+  renderConnections();
+   updateStats();
+  announce((connected?t('connectedNowPrefix'):t('disconnectedNowPrefix'))+platform+' (verified).');
+ }catch(error){
+    announce(t('verifyFailedPrefix')+platform+t('verifyFailedSuffix'));
+ }
+}
+
+async function verifyAllConnections(){
+ const base=(integrationSettings.backendBaseUrl||'').trim();
+ if(!base){
+  announce(t('verifyNeedBackend'));
+  return;
+ }
+ for(const platform of platformCatalog){
+  await verifyConnection(platform);
+ }
+}
+
+function handleOauthCallback(){
+ const url=new URL(window.location.href);
+ const connectedSlug=(url.searchParams.get('connected')||url.searchParams.get('platform')||'').toLowerCase();
+ const oauthStatus=(url.searchParams.get('oauth')||'').toLowerCase();
+
+ if(connectedSlug){
+  const platform=platformBySlug[connectedSlug];
+  if(platform){
+    setConnectionState(platform,true,'oauth');
+   renderConnections();
+   updateStats();
+   show('connections');
+   announce(t('connectedNowPrefix')+platform+t('statusSuffix'));
+  }
+ }
+
+ if(oauthStatus==='error'){
+  show('connections');
+  announce('OAuth connection failed. Please try again.');
+ }
+
+ let changed=false;
+ ['connected','platform','oauth','error'].forEach(key=>{
+  if(url.searchParams.has(key)){
+   url.searchParams.delete(key);
+   changed=true;
+  }
+ });
+ if(changed){
+  const cleaned=url.pathname+(url.searchParams.toString()?('?'+url.searchParams.toString()):'')+url.hash;
+  window.history.replaceState({},document.title,cleaned);
+ }
+}
+
+function renderConnections(){
+ const box=document.getElementById('connectionsList');
+ if(!box) return;
+ box.innerHTML='';
+ platformCatalog.forEach(platform=>{
+  const card=document.createElement('div');
+  card.className='card connection-card';
+
+  const name=document.createElement('h3');
+  name.innerText=platform;
+  card.appendChild(name);
+
+  const status=document.createElement('p');
+  status.className='connection-status status-pill '+(isConnected(platform)?'connected':'disconnected');
+  status.innerText=isConnected(platform)?t('connectedState'):t('disconnectedState');
+  card.appendChild(status);
+
+  const meta=connectionMeta[platform]||{source:'manual',checkedAt:null};
+  const details=document.createElement('p');
+  details.className='status-detail';
+  details.innerText='Source: '+sourceLabel(meta.source)+' | Last check: '+formatCheckedAt(meta.checkedAt);
+  card.appendChild(details);
+
+  const actions=document.createElement('div');
+  actions.className='card-actions';
+
+  const button=document.createElement('button');
+  button.className='btn';
+  button.type='button';
+  const hasOauth=!!getOauthStartUrl(platform);
+  button.innerText=isConnected(platform)?t('disconnectAction'):(hasOauth?'Connect via OAuth':t('connectAction'));
+  button.onclick=()=>toggleConnection(platform);
+  actions.appendChild(button);
+
+  const verifyBtn=document.createElement('button');
+  verifyBtn.className='btn';
+  verifyBtn.type='button';
+  verifyBtn.innerText='Verify';
+  verifyBtn.onclick=()=>verifyConnection(platform);
+  actions.appendChild(verifyBtn);
+
+  card.appendChild(actions);
+
+  box.appendChild(card);
+ });
+}
+
+async function uploadContentToBackend(platform,title,description){
+ const base=(integrationSettings.backendBaseUrl||'').trim().replace(/\/$/,'');
+ if(!base) return null;
+ const slug=platformSlugs[platform]||platform.toLowerCase().replace(/[^a-z0-9]+/g,'-');
+ const response=await fetch(base+'/content/'+slug,{
+  method:'POST',
+  credentials:'include',
+  headers:{'Content-Type':'application/json'},
+  body:JSON.stringify({title,description})
+ });
+ if(!response.ok) throw new Error('Status '+response.status);
+ const data=await response.json();
+ return data&&data.item&&data.item.id?data.item.id:null;
+}
+
+async function addContent(){
+ const title=document.getElementById('title').value.trim();
+ const description=document.getElementById('description').value.trim();
+ const platform=document.getElementById('platform').value;
+ if(!title){
+  announce(t('needTitle'));
+  document.getElementById('title').focus();
+  return;
+ }
+ if(!isConnected(platform)){
+  announce(t('mustConnectPrefix')+platform+t('mustConnectSuffix'));
+  show('connections');
+  return;
+ }
+
+ let remoteId=null;
+ try{
+  remoteId=await uploadContentToBackend(platform,title,description);
+ }catch(error){
+  announce('Added locally, but backend content sync failed for '+platform+'.');
+ }
+
+ library.push({id:nextId('lib'),title,description,platform,remoteId,hidden:false});
+ save();
+ document.getElementById('title').value='';
+ document.getElementById('description').value='';
+ renderLibrary();
+ updateStats();
+ if(remoteId){
+  announce(t('addedPrefix')+title+t('addedMiddle')+platform+t('addedSuffix')+' Synced ID: '+remoteId);
+  return;
+ }
+ announce(t('addedPrefix')+title+t('addedMiddle')+platform+t('addedSuffix'));
+}
+
+function schedulePost(){
+ const title=document.getElementById('scheduleTitle').value.trim();
+ const time=document.getElementById('scheduleTime').value;
+ const platformSelect=document.getElementById('schedulePlatforms');
+ const selectedPlatforms=Array.from(platformSelect.selectedOptions).map(option=>option.value);
+ if(!title||!time||!selectedPlatforms.length){
+  announce(t('needSchedule'));
+  if(!title) document.getElementById('scheduleTitle').focus();
+  else if(!selectedPlatforms.length) platformSelect.focus();
+  else document.getElementById('scheduleTime').focus();
+  return;
+ }
+ for(const platform of selectedPlatforms){
+  schedules.push({id:nextId('sch'),title,time,platform,hidden:false});
+ }
+ save();
+ document.getElementById('scheduleTitle').value='';
+ document.getElementById('scheduleTime').value='';
+ Array.from(platformSelect.options).forEach(option=>{ option.selected=false; });
+ renderSchedules();
+ updateStats();
+ announce(t('scheduledPrefix')+title+t('scheduledMiddle')+new Date(time).toLocaleString()+t('scheduledSuffix'));
+}
+
+function renderLibrary(){
+ const box=document.getElementById('libraryList');
+ box.innerHTML='';
+ if(!library.length){
+  box.innerHTML='<p>'+t('noContent')+'</p>';
+  return;
+ }
+
+ const visibleItems=library.filter(item=>!item.hidden);
+ const hiddenItems=library.filter(item=>item.hidden);
+
+ if(!visibleItems.length){
+  const empty=document.createElement('p');
+  empty.innerText=t('noContent');
+  box.appendChild(empty);
+ }
+
+ visibleItems.forEach(p=>{
+  const div=document.createElement('div');
+  div.className='post';
+   const titleRow=document.createElement('div');
+   titleRow.innerText=p.title+' -> '+p.platform;
+   div.appendChild(titleRow);
+   if(p.description){
+    const descriptionRow=document.createElement('div');
+    descriptionRow.style.marginTop='6px';
+    descriptionRow.innerText=p.description;
+    div.appendChild(descriptionRow);
+   }
+    if(p.remoteId){
+     const remoteRow=document.createElement('div');
+     remoteRow.style.marginTop='6px';
+     remoteRow.style.color='var(--muted)';
+     remoteRow.innerText='Synced content ID: '+p.remoteId;
+     div.appendChild(remoteRow);
+    }
+
+   const actions=document.createElement('div');
+   actions.style.marginTop='10px';
+   actions.style.display='flex';
+   actions.style.gap='8px';
+   actions.style.flexWrap='wrap';
+
+   const hideBtn=document.createElement('button');
+   hideBtn.className='btn';
+   hideBtn.type='button';
+   hideBtn.innerText=t('hideAction');
+   hideBtn.onclick=()=>setLibraryHidden(p.id,true);
+   actions.appendChild(hideBtn);
+
+   const deleteBtn=document.createElement('button');
+   deleteBtn.className='btn';
+   deleteBtn.type='button';
+   deleteBtn.innerText=t('deleteAction');
+   deleteBtn.onclick=()=>deleteLibraryItem(p.id);
+   actions.appendChild(deleteBtn);
+
+   div.appendChild(actions);
+  box.appendChild(div);
+ });
+
+ if(hiddenItems.length){
+  const hiddenHeading=document.createElement('h3');
+  hiddenHeading.style.margin='18px 0 8px';
+  hiddenHeading.innerText=t('hiddenLibraryTitle');
+  box.appendChild(hiddenHeading);
+
+  hiddenItems.forEach(p=>{
+   const div=document.createElement('div');
+   div.className='post';
+   div.innerText=p.title+' -> '+p.platform;
+
+   const actions=document.createElement('div');
+   actions.style.marginTop='10px';
+   actions.style.display='flex';
+   actions.style.gap='8px';
+   actions.style.flexWrap='wrap';
+
+   const unhideBtn=document.createElement('button');
+   unhideBtn.className='btn';
+   unhideBtn.type='button';
+   unhideBtn.innerText=t('unhideAction');
+   unhideBtn.onclick=()=>setLibraryHidden(p.id,false);
+   actions.appendChild(unhideBtn);
+
+   const deleteBtn=document.createElement('button');
+   deleteBtn.className='btn';
+   deleteBtn.type='button';
+   deleteBtn.innerText=t('deleteAction');
+   deleteBtn.onclick=()=>deleteLibraryItem(p.id);
+   actions.appendChild(deleteBtn);
+
+   div.appendChild(actions);
+   box.appendChild(div);
+  });
+ }
+}
+
+function renderSchedules(){
+ const box=document.getElementById('scheduleList');
+ box.innerHTML='';
+ if(!schedules.length){
+  box.innerHTML='<p>'+t('noScheduled')+'</p>';
+  return;
+ }
+
+ const visibleSchedules=schedules.filter(item=>!item.hidden);
+ const hiddenSchedules=schedules.filter(item=>item.hidden);
+
+ if(!visibleSchedules.length){
+  const empty=document.createElement('p');
+  empty.innerText=t('noScheduled');
+  box.appendChild(empty);
+ }
+
+ const groups={};
+ visibleSchedules.forEach(schedule=>{
+  const platform=schedule.platform||t('generalPlatform');
+  if(!groups[platform]) groups[platform]=[];
+  groups[platform].push(schedule);
+ });
+
+ platformCatalog.concat([t('generalPlatform')]).forEach(platform=>{
+  const entries=groups[platform];
+  if(!entries||!entries.length) return;
+
+  const heading=document.createElement('h3');
+  heading.style.margin='16px 0 8px';
+  heading.innerText=platform;
+  box.appendChild(heading);
+
+  entries
+   .slice()
+   .sort((a,b)=>String(a.time).localeCompare(String(b.time)))
+   .forEach(p=>{
+    const div=document.createElement('div');
+    div.className='post';
+      const text=document.createElement('div');
+      text.innerText=p.title+' '+t('scheduledFor')+new Date(p.time).toLocaleString();
+      div.appendChild(text);
+
+      const actions=document.createElement('div');
+      actions.style.marginTop='10px';
+      actions.style.display='flex';
+      actions.style.gap='8px';
+      actions.style.flexWrap='wrap';
+
+      const hideBtn=document.createElement('button');
+      hideBtn.className='btn';
+      hideBtn.type='button';
+      hideBtn.innerText=t('hideAction');
+      hideBtn.onclick=()=>setScheduleHidden(p.id,true);
+      actions.appendChild(hideBtn);
+
+      const deleteBtn=document.createElement('button');
+      deleteBtn.className='btn';
+      deleteBtn.type='button';
+      deleteBtn.innerText=t('deleteAction');
+      deleteBtn.onclick=()=>deleteScheduleItem(p.id);
+      actions.appendChild(deleteBtn);
+
+      div.appendChild(actions);
+    box.appendChild(div);
+   });
+ });
+
+   if(hiddenSchedules.length){
+    const hiddenHeading=document.createElement('h3');
+    hiddenHeading.style.margin='16px 0 8px';
+    hiddenHeading.innerText=t('hiddenScheduleTitle');
+    box.appendChild(hiddenHeading);
+
+    hiddenSchedules
+     .slice()
+     .sort((a,b)=>String(a.time).localeCompare(String(b.time)))
+     .forEach(p=>{
+      const div=document.createElement('div');
+      div.className='post';
+      const text=document.createElement('div');
+      text.innerText=p.title+' '+t('scheduledFor')+new Date(p.time).toLocaleString();
+      div.appendChild(text);
+
+      const actions=document.createElement('div');
+      actions.style.marginTop='10px';
+      actions.style.display='flex';
+      actions.style.gap='8px';
+      actions.style.flexWrap='wrap';
+
+      const unhideBtn=document.createElement('button');
+      unhideBtn.className='btn';
+      unhideBtn.type='button';
+      unhideBtn.innerText=t('unhideAction');
+      unhideBtn.onclick=()=>setScheduleHidden(p.id,false);
+      actions.appendChild(unhideBtn);
+
+      const deleteBtn=document.createElement('button');
+      deleteBtn.className='btn';
+      deleteBtn.type='button';
+      deleteBtn.innerText=t('deleteAction');
+      deleteBtn.onclick=()=>deleteScheduleItem(p.id);
+      actions.appendChild(deleteBtn);
+
+      div.appendChild(actions);
+      box.appendChild(div);
+     });
+   }
+  }
+
+  function renderBackupBin(){
+   const box=document.getElementById('backupList');
+   if(!box) return;
+   box.innerHTML='';
+
+   if(!backupBin.length){
+    box.innerHTML='<p>'+t('backupEmpty')+'</p>';
+    return;
+   }
+
+    const filtered=backupBin.filter(record=>backupFilter==='all'||record.kind===backupFilter);
+    if(!filtered.length){
+     box.innerHTML='<p>'+t('backupEmpty')+'</p>';
+     return;
+    }
+
+    filtered.forEach(record=>{
+    const div=document.createElement('div');
+    div.className='post';
+
+    const item=record.item||{};
+    const when=record.deletedAt?new Date(record.deletedAt).toLocaleString():'-';
+    const title=(item.title||'Untitled')+' ('+(record.kind==='library'?'Library':'Schedule')+')';
+
+    const titleRow=document.createElement('div');
+    titleRow.innerText=title;
+    div.appendChild(titleRow);
+
+    const infoRow=document.createElement('div');
+    infoRow.style.marginTop='6px';
+    infoRow.style.color='var(--muted)';
+    infoRow.innerText='Deleted at: '+when;
+    div.appendChild(infoRow);
+
+    const actions=document.createElement('div');
+    actions.style.marginTop='10px';
+    actions.style.display='flex';
+    actions.style.gap='8px';
+    actions.style.flexWrap='wrap';
+
+    const restoreBtn=document.createElement('button');
+    restoreBtn.className='btn';
+    restoreBtn.type='button';
+    restoreBtn.innerText=t('restoreAction');
+    restoreBtn.onclick=()=>restoreFromBackupBin(record.id);
+    actions.appendChild(restoreBtn);
+
+    const deleteBtn=document.createElement('button');
+    deleteBtn.className='btn';
+    deleteBtn.type='button';
+    deleteBtn.innerText=t('deletePermanentAction');
+    deleteBtn.onclick=()=>deleteFromBackupBin(record.id);
+    actions.appendChild(deleteBtn);
+
+    div.appendChild(actions);
+    box.appendChild(div);
+   });
+}
+
+function updateStats(){
+ document.getElementById('totalPosts').innerText=library.length;
+ document.getElementById('scheduledPosts').innerText=schedules.length;
+ document.getElementById('libraryItems').innerText=library.length;
+ document.getElementById('connectedPlatforms').innerText=platformCatalog.filter(isConnected).length;
+}
+
+document.getElementById('languageSelect').value=language;
+document.getElementById('backendBaseUrl').value=integrationSettings.backendBaseUrl||'';
+if(!localStorage.getItem('language')) localStorage.setItem('language',language);
+normalizeDataState();
+normalizeConnections();
+applyContrast();
+applyTranslations();
+renderConnections();
+renderLibrary();
+renderSchedules();
+renderBackupBin();
+updateStats();
+handleOauthCallback();
+</script>
+</body>
+</html>
