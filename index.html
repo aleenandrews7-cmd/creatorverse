@@ -91,6 +91,11 @@ textarea{resize:vertical;min-height:110px}
 .discussion-item{padding:8px;border-bottom:1px solid var(--status-border)}
 .discussion-item:last-child{border-bottom:none}
 .discussion-meta{font-size:.82rem;color:var(--muted)}
+.help-fab{position:fixed;right:18px;bottom:18px;border:none;border-radius:999px;width:56px;height:56px;font-size:1.25rem;cursor:pointer;background:var(--button);color:var(--button-text);box-shadow:0 10px 24px rgba(2,6,23,.35);z-index:999}
+.ticket-list{display:grid;gap:10px}
+.ticket-card{background:var(--status-bg);border:1px solid var(--status-border);border-radius:10px;padding:12px}
+.ticket-head{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.faq-list{margin:8px 0 0 18px;color:var(--muted)}
 @media (prefers-reduced-motion: reduce){
  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
 }
@@ -120,6 +125,7 @@ textarea{resize:vertical;min-height:110px}
 <button class="btn" onclick="show('dashboard')" role="tab" id="tab-dashboard" aria-controls="dashboard" aria-selected="false" data-i18n="navDashboard">Dashboard</button>
 <button class="btn" onclick="show('connections')" role="tab" id="tab-connections" aria-controls="connections" aria-selected="false" data-i18n="navConnections">Connections</button>
 <button class="btn" onclick="show('collaboration')" role="tab" id="tab-collaboration" aria-controls="collaboration" aria-selected="false" data-i18n="navCollaboration">CreatorCast</button>
+<button class="btn" onclick="show('support')" role="tab" id="tab-support" aria-controls="support" aria-selected="false" data-i18n="navSupport">Help Desk</button>
 <button class="btn btn-primary" onclick="show('upload')" role="tab" id="tab-upload" aria-controls="upload" aria-selected="false" data-i18n="uploadPrimaryCta">Upload Content</button>
 </div>
 </nav>
@@ -371,17 +377,49 @@ textarea{resize:vertical;min-height:110px}
 </div>
 </div>
 </section>
+<section id="support" class="section" role="region" aria-label="Support">
+<div class="container">
+<h2 data-i18n="supportTitle">Help Desk</h2>
+<p data-i18n="supportSubtitle">Submit questions, report bugs, and get instant guidance.</p>
+<div class="settings-grid">
+<div class="card">
+<h3 data-i18n="submitTicketTitle">Submit a Ticket</h3>
+<label for="ticketType" data-i18n="ticketTypeLabel">Issue Type</label>
+<select id="ticketType">
+<option value="question" data-i18n="ticketTypeQuestion">Question</option>
+<option value="bug" data-i18n="ticketTypeBug">Bug Report</option>
+<option value="assistance" data-i18n="ticketTypeAssistance">Need Assistance</option>
+</select>
+<label for="ticketSubject" data-i18n="ticketSubjectLabel">Subject</label>
+<input id="ticketSubject" autocomplete="off" />
+<label for="ticketMessage" data-i18n="ticketMessageLabel">Message</label>
+<textarea id="ticketMessage" autocomplete="off"></textarea>
+<button class="btn" type="button" onclick="submitSupportTicket()" data-i18n="submitTicketAction">Submit Ticket</button>
+<div class="status" id="supportAutoReply" style="margin-top:10px">Auto-reply will appear here.</div>
+<h4 data-i18n="faqSuggestedTitle">Suggested FAQs</h4>
+<ul id="faqSuggestions" class="faq-list"></ul>
+</div>
+<div class="card">
+<h3 data-i18n="adminPanelTitle">Admin Ticket Panel</h3>
+<p class="status-detail" id="adminSupportNotice"></p>
+<div id="supportTicketList" class="ticket-list"></div>
+</div>
+</div>
+</div>
+</section>
 <div class="status" id="status" aria-live="polite">Ready.</div>
 </main>
+<button class="help-fab" type="button" onclick="show('support')" aria-label="Open Help Desk">?</button>
 <div class="footer">
 <p>© 2026 Creatorverse.ai</p>
 </div>
 <script>
 const messages={
  en:{
-   skipToMain:'Skip to main content',navHome:'Home',navDashboard:'Dashboard',navConnections:'Connections',navUpload:'Upload',navScheduler:'Scheduler',navLibrary:'Library',navBackup:'Backup Bin',navCollaboration:'CreatorCast',toggleContrast:'High Contrast',
+   skipToMain:'Skip to main content',navHome:'Home',navDashboard:'Dashboard',navConnections:'Connections',navUpload:'Upload',navScheduler:'Scheduler',navLibrary:'Library',navBackup:'Backup Bin',navCollaboration:'CreatorCast',navSupport:'Help Desk',toggleContrast:'High Contrast',
   uploadPrimaryCta:'Upload Content',connectPlatformsCta:'Connect Platforms',toolsTitle:'Your Tools',openToolAction:'Open Tool',supportedPlatformsTitle:'Supported Platforms',settingsTitle:'Settings',settingsGeneralTitle:'General',languageLabel:'Language',settingsOpenText:'Manage language, contrast, and backup bin.',
   openCreatorCast:'Open CreatorCast',collaborationTitle:'CreatorCast Collaboration',collaborationSubtitle:'Share this workspace with your team and collaborate in real time.',workspaceShareTitle:'Workspace Sharing',workspaceIdLabel:'Workspace ID',joinWorkspace:'Open Workspace',generateWorkspace:'Generate New',shareRoleLabel:'Permission for shared link',roleOwner:'Owner',roleEditor:'Editor',roleViewer:'Viewer',shareLinkLabel:'Share link',copyLink:'Copy Link',discussionTitle:'Discussion',displayNameLabel:'Display name',yourRoleLabel:'Your role',messageLabel:'Message',sendMessage:'Send',viewerNotice:'Viewer mode: editing is locked.',editorNotice:'Editor mode: you can update workspace content.',ownerNotice:'Owner mode: full workspace permissions.',
+  supportTitle:'Help Desk',supportSubtitle:'Submit questions, report bugs, and get instant guidance.',submitTicketTitle:'Submit a Ticket',ticketTypeLabel:'Issue Type',ticketTypeQuestion:'Question',ticketTypeBug:'Bug Report',ticketTypeAssistance:'Need Assistance',ticketSubjectLabel:'Subject',ticketMessageLabel:'Message',submitTicketAction:'Submit Ticket',faqSuggestedTitle:'Suggested FAQs',adminPanelTitle:'Admin Ticket Panel',supportAutoReplyDefault:'Auto-reply will appear here.',supportNeedMessage:'Please add a subject and message before submitting.',supportTicketAdded:'Support ticket submitted.',supportNoTickets:'No support tickets yet.',supportAdminOnly:'Admin responses are available for Owner/Editor.',supportStatusOpen:'Open',supportStatusResolved:'Resolved',supportResolveAction:'Mark Resolved',supportRespondAction:'Send Reply',supportReplyPlaceholder:'Write an admin response...',
   heroTitle:'Upload Once. Reach Everywhere.',heroSubtitle:'A creator platform to upload, schedule and manage content across platforms.',
   cardUploadTitle:'Upload Content',cardUploadText:'Add videos or posts to your creator library.',cardScheduleTitle:'Schedule Posts',cardScheduleText:'Choose exactly when your content goes live.',
   cardPlatformsTitle:'Manage Platforms',cardPlatformsText:'Control all creator accounts from one place.',cardDashboardTitle:'Creator Dashboard',cardDashboardText:'Track upcoming posts and manage your workflow.',
@@ -493,6 +531,7 @@ let connections=JSON.parse(localStorage.getItem(workspaceKey('connections'))||'{
 let connectionMeta=JSON.parse(localStorage.getItem(workspaceKey('connectionMeta'))||'{}');
 let integrationSettings=JSON.parse(localStorage.getItem(workspaceKey('integrationSettings'))||'{"backendBaseUrl":""}');
 let collaborationMessages=JSON.parse(localStorage.getItem(workspaceKey('discussion'))||'[]');
+let helpTickets=JSON.parse(localStorage.getItem(workspaceKey('helpTickets'))||'[]');
 let collaborationName=localStorage.getItem('creatorcastDisplayName')||'Guest';
 const creatorCastChannel=typeof BroadcastChannel!=='undefined'?new BroadcastChannel('creatorcast-workspace'):null;
 let analyticsResults=[];
@@ -550,6 +589,7 @@ function applyTranslations(){
  renderBackupBin();
  renderAnalytics();
  renderCollaboration();
+ renderSupport();
 }
 
 function setLanguage(next){
@@ -608,6 +648,7 @@ function show(section){
  updateStats();
  if(section==='dashboard') renderAnalytics();
  if(section==='collaboration') renderCollaboration();
+ if(section==='support') renderSupport();
 }
 
 function toggleMenu(){
@@ -624,7 +665,8 @@ function buildWorkspaceState(){
   connections,
   connectionMeta,
   integrationSettings,
-  collaborationMessages
+  collaborationMessages,
+  helpTickets
  };
 }
 
@@ -638,6 +680,7 @@ function applyWorkspaceState(nextState){
  connectionMeta=(nextState.connectionMeta&&typeof nextState.connectionMeta==='object')?nextState.connectionMeta:{};
  integrationSettings=(nextState.integrationSettings&&typeof nextState.integrationSettings==='object')?nextState.integrationSettings:{backendBaseUrl:''};
  collaborationMessages=Array.isArray(nextState.collaborationMessages)?nextState.collaborationMessages:[];
+ helpTickets=Array.isArray(nextState.helpTickets)?nextState.helpTickets:[];
  normalizeDataState();
  normalizeConnections();
  save(true);
@@ -646,6 +689,7 @@ function applyWorkspaceState(nextState){
  renderSchedules();
  renderBackupBin();
  renderCollaboration();
+ renderSupport();
  updateStats();
 }
 
@@ -720,6 +764,7 @@ function applyWorkspaceId(){
  connectionMeta=JSON.parse(localStorage.getItem(workspaceKey('connectionMeta'))||'{}');
  integrationSettings=JSON.parse(localStorage.getItem(workspaceKey('integrationSettings'))||'{"backendBaseUrl":""}');
  collaborationMessages=JSON.parse(localStorage.getItem(workspaceKey('discussion'))||'[]');
+ helpTickets=JSON.parse(localStorage.getItem(workspaceKey('helpTickets'))||'[]');
  normalizeDataState();
  normalizeConnections();
  loadWorkspaceState();
@@ -781,6 +826,143 @@ function renderCollaboration(){
  }
  document.getElementById('discussionInput').disabled=false;
  updateShareArtifacts();
+}
+
+function suggestFaqs(text){
+ const normalized=String(text||'').toLowerCase();
+ const suggestions=[];
+ if(/connect|oauth|login|account/.test(normalized)) suggestions.push('How do I connect a platform account in Connections?');
+ if(/schedule|time|publish/.test(normalized)) suggestions.push('How do I schedule content for multiple platforms?');
+ if(/collab|creatorcast|share|workspace/.test(normalized)) suggestions.push('How do I share my workspace with CreatorCast?');
+ if(/analytics|views|likes|metrics/.test(normalized)) suggestions.push('How do I load analytics from connected platforms?');
+ if(/delete|backup|restore|hidden/.test(normalized)) suggestions.push('How do I restore deleted items from Backup Bin?');
+ if(!suggestions.length) suggestions.push('Visit Settings to configure preferences and backup controls.');
+ return suggestions.slice(0,3);
+}
+
+function autoReplyForTicket(subject,message){
+ const text=(String(subject||'')+' '+String(message||'')).toLowerCase();
+ if(/connect|oauth|login|account/.test(text)) return 'Try Connections -> set Backend URL -> Save OAuth Settings -> Connect via OAuth -> Verify.';
+ if(/schedule|publish|time/.test(text)) return 'Open Scheduler, select one or more platforms, then choose date/time and submit.';
+ if(/collab|creatorcast|share|workspace/.test(text)) return 'Open CreatorCast, set a Workspace ID, copy your share link or QR, and invite collaborators.';
+ if(/bug|error|crash|fail/.test(text)) return 'Please include exact steps, browser/device details, and a screenshot. Your ticket has been logged for review.';
+ return 'Thanks for reaching out. A support admin will review your ticket soon.';
+}
+
+function renderFaqSuggestions(text){
+ const box=document.getElementById('faqSuggestions');
+ if(!box) return;
+ const list=suggestFaqs(text);
+ box.innerHTML='';
+ list.forEach(item=>{
+  const li=document.createElement('li');
+  li.textContent=item;
+  box.appendChild(li);
+ });
+}
+
+function submitSupportTicket(){
+ const type=document.getElementById('ticketType').value;
+ const subject=(document.getElementById('ticketSubject').value||'').trim();
+ const message=(document.getElementById('ticketMessage').value||'').trim();
+ if(!subject||!message){
+  announce(t('supportNeedMessage'));
+  return;
+ }
+ const autoReply=autoReplyForTicket(subject,message);
+ helpTickets.unshift({
+  id:nextId('ticket'),
+  type,
+  subject,
+  message,
+  autoReply,
+  status:'open',
+  adminReply:'',
+  createdAt:new Date().toISOString()
+ });
+ if(helpTickets.length>250) helpTickets=helpTickets.slice(0,250);
+ save();
+ document.getElementById('supportAutoReply').textContent=autoReply;
+ document.getElementById('ticketSubject').value='';
+ document.getElementById('ticketMessage').value='';
+ renderFaqSuggestions('');
+ renderSupport();
+ announce(t('supportTicketAdded'));
+}
+
+function sendAdminTicketReply(ticketId){
+ if(!canEditWorkspace()) return;
+ const ticket=helpTickets.find(item=>item.id===ticketId);
+ if(!ticket) return;
+ const input=document.getElementById('admin-reply-'+ticketId);
+ const reply=(input&&input.value?input.value:'').trim();
+ if(!reply) return;
+ ticket.adminReply=reply;
+ ticket.status='resolved';
+ save();
+ renderSupport();
+}
+
+function resolveTicket(ticketId){
+ if(!canEditWorkspace()) return;
+ const ticket=helpTickets.find(item=>item.id===ticketId);
+ if(!ticket) return;
+ ticket.status='resolved';
+ save();
+ renderSupport();
+}
+
+function renderSupport(){
+ const autoReply=document.getElementById('supportAutoReply');
+ const list=document.getElementById('supportTicketList');
+ const notice=document.getElementById('adminSupportNotice');
+ if(!autoReply||!list||!notice) return;
+
+ if(!autoReply.textContent.trim()) autoReply.textContent=t('supportAutoReplyDefault');
+ notice.textContent=canEditWorkspace()?t('ownerNotice'):t('supportAdminOnly');
+
+ list.innerHTML='';
+ if(!helpTickets.length){
+  list.innerHTML='<p class="status-detail">'+t('supportNoTickets')+'</p>';
+  return;
+ }
+
+ helpTickets.slice().forEach(ticket=>{
+  const card=document.createElement('div');
+  card.className='ticket-card';
+  const statusLabel=t(ticket.status==='resolved'?'supportStatusResolved':'supportStatusOpen');
+  const createdAt=new Date(ticket.createdAt).toLocaleString();
+  card.innerHTML='<div class="ticket-head"><strong>'+ticket.subject+'</strong><span>'+statusLabel+'</span></div>'+
+   '<div class="discussion-meta">'+ticket.type+' | '+createdAt+'</div>'+
+   '<p>'+ticket.message+'</p>'+
+   '<div class="status-detail">Auto-reply: '+ticket.autoReply+'</div>'+
+   (ticket.adminReply?('<div class="status-detail">Admin: '+ticket.adminReply+'</div>'):'');
+
+  if(canEditWorkspace()){
+   const actions=document.createElement('div');
+   actions.className='card-actions';
+   actions.style.marginTop='10px';
+   actions.innerHTML='<input id="admin-reply-'+ticket.id+'" placeholder="'+t('supportReplyPlaceholder')+'" />';
+
+   const replyBtn=document.createElement('button');
+   replyBtn.className='btn';
+   replyBtn.type='button';
+   replyBtn.textContent=t('supportRespondAction');
+   replyBtn.onclick=()=>sendAdminTicketReply(ticket.id);
+   actions.appendChild(replyBtn);
+
+   const resolveBtn=document.createElement('button');
+   resolveBtn.className='btn';
+   resolveBtn.type='button';
+   resolveBtn.textContent=t('supportResolveAction');
+   resolveBtn.onclick=()=>resolveTicket(ticket.id);
+   actions.appendChild(resolveBtn);
+
+   card.appendChild(actions);
+  }
+
+  list.appendChild(card);
+ });
 }
 
 function initializeCreatorCast(){
@@ -897,6 +1079,7 @@ function save(skipBroadcast){
  localStorage.setItem(workspaceKey('connectionMeta'),JSON.stringify(connectionMeta));
  localStorage.setItem(workspaceKey('integrationSettings'),JSON.stringify(integrationSettings));
  localStorage.setItem(workspaceKey('discussion'),JSON.stringify(collaborationMessages));
+ localStorage.setItem(workspaceKey('helpTickets'),JSON.stringify(helpTickets));
  if(!skipBroadcast) broadcastWorkspaceUpdate('state');
 }
 
@@ -1558,6 +1741,10 @@ document.getElementById('backendBaseUrl').value=integrationSettings.backendBaseU
 document.getElementById('workspaceIdInput').value=workspaceId;
 document.getElementById('currentRole').value=currentRole;
 document.getElementById('collaboratorName').value=collaborationName;
+document.getElementById('supportAutoReply').textContent=t('supportAutoReplyDefault');
+document.getElementById('ticketMessage').addEventListener('input',event=>{
+ renderFaqSuggestions(event.target.value||'');
+});
 if(!localStorage.getItem('language')) localStorage.setItem('language',language);
 normalizeDataState();
 normalizeConnections();
@@ -1569,6 +1756,7 @@ renderLibrary();
 renderSchedules();
 renderBackupBin();
 renderCollaboration();
+renderSupport();
 initializeCreatorCast();
 updateStats();
 handleOauthCallback();
