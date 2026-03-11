@@ -83,6 +83,14 @@ textarea{resize:vertical;min-height:110px}
 .analytics-table{width:100%;border-collapse:collapse}
 .analytics-table th,.analytics-table td{border-bottom:1px solid var(--status-border);padding:8px;text-align:left}
 .settings-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 18px}
+.share-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.share-row input,.share-row select{margin:0}
+.qr-wrap{display:flex;justify-content:center;margin-top:12px}
+.discussion-list{max-height:260px;overflow:auto;border:1px solid var(--status-border);border-radius:8px;padding:10px;background:var(--status-bg)}
+.discussion-item{padding:8px;border-bottom:1px solid var(--status-border)}
+.discussion-item:last-child{border-bottom:none}
+.discussion-meta{font-size:.82rem;color:var(--muted)}
 @media (prefers-reduced-motion: reduce){
  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
 }
@@ -111,6 +119,7 @@ textarea{resize:vertical;min-height:110px}
 <button class="btn" onclick="show('home')" role="tab" id="tab-home" aria-controls="home" aria-selected="true" data-i18n="navHome">Home</button>
 <button class="btn" onclick="show('dashboard')" role="tab" id="tab-dashboard" aria-controls="dashboard" aria-selected="false" data-i18n="navDashboard">Dashboard</button>
 <button class="btn" onclick="show('connections')" role="tab" id="tab-connections" aria-controls="connections" aria-selected="false" data-i18n="navConnections">Connections</button>
+<button class="btn" onclick="show('collaboration')" role="tab" id="tab-collaboration" aria-controls="collaboration" aria-selected="false" data-i18n="navCollaboration">CreatorCast</button>
 <button class="btn btn-primary" onclick="show('upload')" role="tab" id="tab-upload" aria-controls="upload" aria-selected="false" data-i18n="uploadPrimaryCta">Upload Content</button>
 </div>
 </nav>
@@ -182,6 +191,10 @@ textarea{resize:vertical;min-height:110px}
 <div class="container">
 <h2 data-i18n="dashboardTitle">Creator Dashboard</h2>
 <p data-i18n="dashboardSubtitle">Overview of your activity.</p>
+<div class="toolbar">
+<button class="btn" type="button" onclick="show('collaboration')" data-i18n="openCreatorCast">Open CreatorCast</button>
+<span class="status-detail" id="workspaceBadge">Workspace: default</span>
+</div>
 <div class="grid">
 <div class="card">
 <h3 data-i18n="totalPostsLabel">Total Posts</h3>
@@ -205,6 +218,55 @@ textarea{resize:vertical;min-height:110px}
 <p class="analytics-summary" id="analyticsSummary" data-i18n="analyticsEmpty">Load analytics to see views, likes, comments, and engagement by platform.</p>
 <button class="btn" type="button" onclick="loadAnalytics()" data-i18n="analyticsLoad">Load Analytics</button>
 <div id="analyticsTableWrap" style="margin-top:12px"></div>
+</div>
+</div>
+</section>
+<section id="collaboration" class="section" role="region" aria-label="Collaboration">
+<div class="container">
+<h2 data-i18n="collaborationTitle">CreatorCast Collaboration</h2>
+<p data-i18n="collaborationSubtitle">Share this workspace with your team and collaborate in real time.</p>
+<div class="settings-grid">
+<div class="card">
+<h3 data-i18n="workspaceShareTitle">Workspace Sharing</h3>
+<label for="workspaceIdInput" data-i18n="workspaceIdLabel">Workspace ID</label>
+<input id="workspaceIdInput" autocomplete="off" />
+<div class="card-actions">
+<button class="btn" type="button" onclick="applyWorkspaceId()" data-i18n="joinWorkspace">Open Workspace</button>
+<button class="btn" type="button" onclick="generateWorkspaceId()" data-i18n="generateWorkspace">Generate New</button>
+</div>
+<label for="shareRole" data-i18n="shareRoleLabel">Permission for shared link</label>
+<select id="shareRole" onchange="updateShareArtifacts()">
+<option value="viewer" data-i18n="roleViewer">Viewer</option>
+<option value="editor" data-i18n="roleEditor">Editor</option>
+<option value="owner" data-i18n="roleOwner">Owner</option>
+</select>
+<label for="shareLinkInput" data-i18n="shareLinkLabel">Share link</label>
+<div class="share-row">
+<input id="shareLinkInput" readonly />
+<button class="btn" type="button" onclick="copyShareLink()" data-i18n="copyLink">Copy Link</button>
+</div>
+<div class="qr-wrap">
+<img id="shareQr" alt="CreatorCast QR code" width="180" height="180" />
+</div>
+</div>
+<div class="card">
+<h3 data-i18n="discussionTitle">Discussion</h3>
+<label for="collaboratorName" data-i18n="displayNameLabel">Display name</label>
+<input id="collaboratorName" autocomplete="off" />
+<label for="currentRole" data-i18n="yourRoleLabel">Your role</label>
+<select id="currentRole" onchange="setCurrentRole(this.value)">
+<option value="owner" data-i18n="roleOwner">Owner</option>
+<option value="editor" data-i18n="roleEditor">Editor</option>
+<option value="viewer" data-i18n="roleViewer">Viewer</option>
+</select>
+<p class="status-detail" id="permissionNotice"></p>
+<div id="discussionList" class="discussion-list"></div>
+<label for="discussionInput" data-i18n="messageLabel">Message</label>
+<div class="share-row">
+<input id="discussionInput" autocomplete="off" />
+<button class="btn" type="button" onclick="sendDiscussionMessage()" data-i18n="sendMessage">Send</button>
+</div>
+</div>
 </div>
 </div>
 </section>
@@ -315,8 +377,9 @@ textarea{resize:vertical;min-height:110px}
 <script>
 const messages={
  en:{
-   skipToMain:'Skip to main content',navHome:'Home',navDashboard:'Dashboard',navConnections:'Connections',navUpload:'Upload',navScheduler:'Scheduler',navLibrary:'Library',navBackup:'Backup Bin',toggleContrast:'High Contrast',
+   skipToMain:'Skip to main content',navHome:'Home',navDashboard:'Dashboard',navConnections:'Connections',navUpload:'Upload',navScheduler:'Scheduler',navLibrary:'Library',navBackup:'Backup Bin',navCollaboration:'CreatorCast',toggleContrast:'High Contrast',
   uploadPrimaryCta:'Upload Content',connectPlatformsCta:'Connect Platforms',toolsTitle:'Your Tools',openToolAction:'Open Tool',supportedPlatformsTitle:'Supported Platforms',settingsTitle:'Settings',settingsGeneralTitle:'General',languageLabel:'Language',settingsOpenText:'Manage language, contrast, and backup bin.',
+  openCreatorCast:'Open CreatorCast',collaborationTitle:'CreatorCast Collaboration',collaborationSubtitle:'Share this workspace with your team and collaborate in real time.',workspaceShareTitle:'Workspace Sharing',workspaceIdLabel:'Workspace ID',joinWorkspace:'Open Workspace',generateWorkspace:'Generate New',shareRoleLabel:'Permission for shared link',roleOwner:'Owner',roleEditor:'Editor',roleViewer:'Viewer',shareLinkLabel:'Share link',copyLink:'Copy Link',discussionTitle:'Discussion',displayNameLabel:'Display name',yourRoleLabel:'Your role',messageLabel:'Message',sendMessage:'Send',viewerNotice:'Viewer mode: editing is locked.',editorNotice:'Editor mode: you can update workspace content.',ownerNotice:'Owner mode: full workspace permissions.',
   heroTitle:'Upload Once. Reach Everywhere.',heroSubtitle:'A creator platform to upload, schedule and manage content across platforms.',
   cardUploadTitle:'Upload Content',cardUploadText:'Add videos or posts to your creator library.',cardScheduleTitle:'Schedule Posts',cardScheduleText:'Choose exactly when your content goes live.',
   cardPlatformsTitle:'Manage Platforms',cardPlatformsText:'Control all creator accounts from one place.',cardDashboardTitle:'Creator Dashboard',cardDashboardText:'Track upcoming posts and manage your workflow.',
@@ -326,7 +389,7 @@ const messages={
   schedulerTitle:'Schedule Content',schedulePlatformsLabel:'Platforms',scheduleSelectHint:'Choose one or more platforms (Ctrl/Cmd + click for multiple).',publishDateTimeLabel:'Publish date and time',schedulePost:'Schedule Post',libraryTitle:'Content Library',backupTitle:'Backup Bin',
   ready:'Ready.',sectionOpened:' section opened.',needTitle:'Please enter a content title before adding to library.',needSchedule:'Please provide title, platform, and date/time to schedule.',
   addedPrefix:'Added ',addedMiddle:' to library for ',addedSuffix:'.',scheduledPrefix:'Scheduled ',scheduledMiddle:' for ',scheduledSuffix:'.',connectedNowPrefix:'Connected ',disconnectedNowPrefix:'Disconnected ',statusSuffix:'.',verifyNeedBackend:'Add Backend base URL first, then verify connection status.',verifyCheckingPrefix:'Checking connection for ',verifyCheckingSuffix:'...',verifyFailedPrefix:'Could not verify ',verifyFailedSuffix:'. Check backend status endpoint.',disconnectFailedPrefix:'Could not disconnect ',disconnectFailedSuffix:' from backend. Try again.',
-  noContent:'No content yet. Add your first item in Upload.',noScheduled:'No scheduled posts yet.',scheduledFor:'scheduled for ',generalPlatform:'General',hideAction:'Hide',unhideAction:'Unhide',deleteAction:'Delete',restoreAction:'Restore',deletePermanentAction:'Delete Permanently',backupEmpty:'Backup bin is empty.',hiddenLibraryTitle:'Hidden Library Items',hiddenScheduleTitle:'Hidden Scheduled Items',movedToBin:'Moved to backup bin.',restoredFromBin:'Restored from backup bin.',binEmptied:'Backup bin cleared.',backupFilterLabel:'Filter',backupFilterAll:'All',backupFilterLibrary:'Library',backupFilterSchedule:'Schedule',confirmDeleteItem:'Delete this item and move it to backup bin?',confirmDeletePermanentItem:'Delete this item permanently from backup bin?',confirmEmptyBin:'Delete all items permanently from backup bin?'
+  noContent:'No content yet. Add your first item in Upload.',noScheduled:'No scheduled posts yet.',scheduledFor:'scheduled for ',generalPlatform:'General',hideAction:'Hide',unhideAction:'Unhide',deleteAction:'Delete',restoreAction:'Restore',deletePermanentAction:'Delete Permanently',backupEmpty:'Backup bin is empty.',hiddenLibraryTitle:'Hidden Library Items',hiddenScheduleTitle:'Hidden Scheduled Items',movedToBin:'Moved to backup bin.',restoredFromBin:'Restored from backup bin.',binEmptied:'Backup bin cleared.',backupFilterLabel:'Filter',backupFilterAll:'All',backupFilterLibrary:'Library',backupFilterSchedule:'Schedule',confirmDeleteItem:'Delete this item and move it to backup bin?',confirmDeletePermanentItem:'Delete this item permanently from backup bin?',confirmEmptyBin:'Delete all items permanently from backup bin?',workspaceOpened:'Workspace opened: ',workspaceCopied:'Share link copied.',workspaceInvalid:'Enter a workspace ID first.',messageSent:'Message sent.'
  },
  es:{
    skipToMain:'Saltar al contenido principal',navHome:'Inicio',navDashboard:'Panel',navConnections:'Conexiones',navUpload:'Subir',navScheduler:'Programar',navLibrary:'Biblioteca',toggleContrast:'Alto Contraste',
@@ -407,16 +470,29 @@ function detectBrowserLanguage(){
 
 let language=localStorage.getItem('language')||detectBrowserLanguage();
 let contrast=localStorage.getItem('contrast')||'normal';
-let library=JSON.parse(localStorage.getItem('library')||'[]');
-let schedules=JSON.parse(localStorage.getItem('schedules')||'[]');
-let backupBin=JSON.parse(localStorage.getItem('backupBin')||'[]');
-let backupFilter=localStorage.getItem('backupFilter')||'all';
+const urlState=new URL(window.location.href);
+let workspaceId=(urlState.searchParams.get('cast')||localStorage.getItem('creatorcastWorkspaceId')||'default').trim().toLowerCase();
+if(!workspaceId) workspaceId='default';
+let currentRole=(urlState.searchParams.get('role')||localStorage.getItem('creatorcastRole')||'owner').toLowerCase();
+if(!['owner','editor','viewer'].includes(currentRole)) currentRole='owner';
+
+function workspaceKey(name){
+ return 'creatorcast_'+workspaceId+'_'+name;
+}
+
+let library=JSON.parse(localStorage.getItem(workspaceKey('library'))||'[]');
+let schedules=JSON.parse(localStorage.getItem(workspaceKey('schedules'))||'[]');
+let backupBin=JSON.parse(localStorage.getItem(workspaceKey('backupBin'))||'[]');
+let backupFilter=localStorage.getItem(workspaceKey('backupFilter'))||'all';
 const platformCatalog=['YouTube','Instagram','TikTok','X / Twitter','Twitch','Kick','YouTube Gaming'];
 const platformSlugs={'YouTube':'youtube','Instagram':'instagram','TikTok':'tiktok','X / Twitter':'x','Twitch':'twitch','Kick':'kick','YouTube Gaming':'youtube-gaming'};
 const platformBySlug=Object.fromEntries(Object.entries(platformSlugs).map(([name,slug])=>[slug,name]));
-let connections=JSON.parse(localStorage.getItem('connections')||'{}');
-let connectionMeta=JSON.parse(localStorage.getItem('connectionMeta')||'{}');
-let integrationSettings=JSON.parse(localStorage.getItem('integrationSettings')||'{"backendBaseUrl":""}');
+let connections=JSON.parse(localStorage.getItem(workspaceKey('connections'))||'{}');
+let connectionMeta=JSON.parse(localStorage.getItem(workspaceKey('connectionMeta'))||'{}');
+let integrationSettings=JSON.parse(localStorage.getItem(workspaceKey('integrationSettings'))||'{"backendBaseUrl":""}');
+let collaborationMessages=JSON.parse(localStorage.getItem(workspaceKey('discussion'))||'[]');
+let collaborationName=localStorage.getItem('creatorcastDisplayName')||'Guest';
+const creatorCastChannel=typeof BroadcastChannel!=='undefined'?new BroadcastChannel('creatorcast-workspace'):null;
 let analyticsResults=[];
 
 function nextId(prefix){
@@ -447,8 +523,8 @@ function normalizeConnections(){
    connectionMeta[platform]={source:'manual',checkedAt:null};
   }
  });
- localStorage.setItem('connections',JSON.stringify(connections));
- localStorage.setItem('connectionMeta',JSON.stringify(connectionMeta));
+ localStorage.setItem(workspaceKey('connections'),JSON.stringify(connections));
+ localStorage.setItem(workspaceKey('connectionMeta'),JSON.stringify(connectionMeta));
 }
 
 function t(key){
@@ -471,6 +547,7 @@ function applyTranslations(){
  renderSchedules();
  renderBackupBin();
  renderAnalytics();
+ renderCollaboration();
 }
 
 function setLanguage(next){
@@ -500,8 +577,19 @@ function announce(message){
 
 function setBackupFilter(value){
  backupFilter=['all','library','schedule'].includes(value)?value:'all';
- localStorage.setItem('backupFilter',backupFilter);
+ localStorage.setItem(workspaceKey('backupFilter'),backupFilter);
  renderBackupBin();
+}
+
+function canEditWorkspace(){
+ return currentRole==='owner' || currentRole==='editor';
+}
+
+function blockViewerEdits(){
+ if(canEditWorkspace()) return false;
+ announce(t('viewerNotice'));
+ show('collaboration');
+ return true;
 }
 
 function show(section){
@@ -517,10 +605,200 @@ function show(section){
  announce(section.charAt(0).toUpperCase()+section.slice(1)+t('sectionOpened'));
  updateStats();
  if(section==='dashboard') renderAnalytics();
+ if(section==='collaboration') renderCollaboration();
 }
 
 function toggleMenu(){
  document.querySelector('nav').classList.toggle('menu-open');
+}
+
+function buildWorkspaceState(){
+ return {
+  workspaceId,
+  library,
+  schedules,
+  backupBin,
+  backupFilter,
+  connections,
+  connectionMeta,
+  integrationSettings,
+  collaborationMessages
+ };
+}
+
+function applyWorkspaceState(nextState){
+ if(!nextState) return;
+ library=Array.isArray(nextState.library)?nextState.library:[];
+ schedules=Array.isArray(nextState.schedules)?nextState.schedules:[];
+ backupBin=Array.isArray(nextState.backupBin)?nextState.backupBin:[];
+ backupFilter=['all','library','schedule'].includes(nextState.backupFilter)?nextState.backupFilter:'all';
+ connections=(nextState.connections&&typeof nextState.connections==='object')?nextState.connections:{};
+ connectionMeta=(nextState.connectionMeta&&typeof nextState.connectionMeta==='object')?nextState.connectionMeta:{};
+ integrationSettings=(nextState.integrationSettings&&typeof nextState.integrationSettings==='object')?nextState.integrationSettings:{backendBaseUrl:''};
+ collaborationMessages=Array.isArray(nextState.collaborationMessages)?nextState.collaborationMessages:[];
+ normalizeDataState();
+ normalizeConnections();
+ save(true);
+ renderConnections();
+ renderLibrary();
+ renderSchedules();
+ renderBackupBin();
+ renderCollaboration();
+ updateStats();
+}
+
+function broadcastWorkspaceUpdate(reason){
+ const payload={type:'workspace-update',workspaceId,reason,state:buildWorkspaceState(),sentAt:new Date().toISOString()};
+ localStorage.setItem(workspaceKey('state'),JSON.stringify(payload));
+ if(creatorCastChannel) creatorCastChannel.postMessage(payload);
+}
+
+function loadWorkspaceState(){
+ const raw=localStorage.getItem(workspaceKey('state'));
+ if(!raw) return;
+ try{
+  const parsed=JSON.parse(raw);
+  if(parsed&&parsed.state) applyWorkspaceState(parsed.state);
+ }catch(error){
+  return;
+ }
+}
+
+function setCurrentRole(role){
+ currentRole=['owner','editor','viewer'].includes(role)?role:'viewer';
+ localStorage.setItem('creatorcastRole',currentRole);
+ const url=new URL(window.location.href);
+ url.searchParams.set('role',currentRole);
+ url.searchParams.set('cast',workspaceId);
+ window.history.replaceState({},document.title,url.pathname+'?'+url.searchParams.toString());
+ renderCollaboration();
+}
+
+function updateShareArtifacts(){
+ const shareRoleEl=document.getElementById('shareRole');
+ const linkEl=document.getElementById('shareLinkInput');
+ const qrEl=document.getElementById('shareQr');
+ if(!shareRoleEl||!linkEl||!qrEl) return;
+ const role=shareRoleEl.value;
+ const base=window.location.origin+window.location.pathname;
+ const link=base+'?cast='+encodeURIComponent(workspaceId)+'&role='+encodeURIComponent(role);
+ linkEl.value=link;
+ qrEl.src='https://api.qrserver.com/v1/create-qr-code/?size=180x180&data='+encodeURIComponent(link);
+}
+
+async function copyShareLink(){
+ const link=document.getElementById('shareLinkInput').value;
+ if(!link) return;
+ try{
+  await navigator.clipboard.writeText(link);
+  announce(t('workspaceCopied'));
+ }catch(error){
+  announce(link);
+ }
+}
+
+function applyWorkspaceId(){
+ const next=(document.getElementById('workspaceIdInput').value||'').trim().toLowerCase();
+ if(!next){
+  announce(t('workspaceInvalid'));
+  return;
+ }
+ workspaceId=next.replace(/[^a-z0-9-]/g,'-');
+ if(!workspaceId) workspaceId='default';
+ localStorage.setItem('creatorcastWorkspaceId',workspaceId);
+ const url=new URL(window.location.href);
+ url.searchParams.set('cast',workspaceId);
+ url.searchParams.set('role',currentRole);
+ window.history.replaceState({},document.title,url.pathname+'?'+url.searchParams.toString());
+ library=JSON.parse(localStorage.getItem(workspaceKey('library'))||'[]');
+ schedules=JSON.parse(localStorage.getItem(workspaceKey('schedules'))||'[]');
+ backupBin=JSON.parse(localStorage.getItem(workspaceKey('backupBin'))||'[]');
+ backupFilter=localStorage.getItem(workspaceKey('backupFilter'))||'all';
+ connections=JSON.parse(localStorage.getItem(workspaceKey('connections'))||'{}');
+ connectionMeta=JSON.parse(localStorage.getItem(workspaceKey('connectionMeta'))||'{}');
+ integrationSettings=JSON.parse(localStorage.getItem(workspaceKey('integrationSettings'))||'{"backendBaseUrl":""}');
+ collaborationMessages=JSON.parse(localStorage.getItem(workspaceKey('discussion'))||'[]');
+ normalizeDataState();
+ normalizeConnections();
+ loadWorkspaceState();
+ document.getElementById('backendBaseUrl').value=integrationSettings.backendBaseUrl||'';
+ applyTranslations();
+ updateShareArtifacts();
+ announce(t('workspaceOpened')+workspaceId);
+}
+
+function generateWorkspaceId(){
+ document.getElementById('workspaceIdInput').value='cast-'+Math.random().toString(36).slice(2,8);
+ applyWorkspaceId();
+}
+
+function sendDiscussionMessage(){
+ const text=(document.getElementById('discussionInput').value||'').trim();
+ if(!text) return;
+ const author=(document.getElementById('collaboratorName').value||'Guest').trim()||'Guest';
+ collaborationName=author;
+ localStorage.setItem('creatorcastDisplayName',collaborationName);
+ collaborationMessages.push({
+  id:nextId('msg'),
+  author,
+  role:currentRole,
+  text,
+  createdAt:new Date().toISOString()
+ });
+ if(collaborationMessages.length>150) collaborationMessages=collaborationMessages.slice(-150);
+ save();
+ document.getElementById('discussionInput').value='';
+ renderCollaboration();
+ announce(t('messageSent'));
+}
+
+function renderCollaboration(){
+ const workspaceInput=document.getElementById('workspaceIdInput');
+ const roleSelect=document.getElementById('currentRole');
+ const badge=document.getElementById('workspaceBadge');
+ const nameInput=document.getElementById('collaboratorName');
+ const discussion=document.getElementById('discussionList');
+ const notice=document.getElementById('permissionNotice');
+ if(!workspaceInput||!roleSelect||!badge||!nameInput||!discussion||!notice) return;
+ workspaceInput.value=workspaceId;
+ roleSelect.value=currentRole;
+ nameInput.value=collaborationName;
+ badge.textContent='Workspace: '+workspaceId;
+ notice.textContent=currentRole==='viewer'?t('viewerNotice'):(currentRole==='editor'?t('editorNotice'):t('ownerNotice'));
+
+ discussion.innerHTML='';
+ if(!collaborationMessages.length){
+  discussion.innerHTML='<p class="status-detail">No messages yet.</p>';
+ }else{
+  collaborationMessages.slice().sort((a,b)=>String(a.createdAt).localeCompare(String(b.createdAt))).forEach(item=>{
+   const row=document.createElement('div');
+   row.className='discussion-item';
+   row.innerHTML='<div><strong>'+item.author+'</strong>: '+item.text+'</div><div class="discussion-meta">'+item.role+' | '+new Date(item.createdAt).toLocaleString()+'</div>';
+   discussion.appendChild(row);
+  });
+ }
+ document.getElementById('discussionInput').disabled=false;
+ updateShareArtifacts();
+}
+
+function initializeCreatorCast(){
+ if(creatorCastChannel){
+  creatorCastChannel.addEventListener('message',event=>{
+   const data=event.data;
+   if(!data||data.type!=='workspace-update'||data.workspaceId!==workspaceId) return;
+   if(data.state) applyWorkspaceState(data.state);
+  });
+ }
+
+ window.addEventListener('storage',event=>{
+  if(event.key!==workspaceKey('state')||!event.newValue) return;
+  try{
+   const parsed=JSON.parse(event.newValue);
+   if(parsed&&parsed.state) applyWorkspaceState(parsed.state);
+  }catch(error){
+   return;
+  }
+ });
 }
 
 async function loadAnalytics(){
@@ -608,10 +886,16 @@ function renderAnalytics(){
  wrap.innerHTML=table;
 }
 
-function save(){
- localStorage.setItem('library',JSON.stringify(library));
- localStorage.setItem('schedules',JSON.stringify(schedules));
- localStorage.setItem('backupBin',JSON.stringify(backupBin));
+function save(skipBroadcast){
+ localStorage.setItem(workspaceKey('library'),JSON.stringify(library));
+ localStorage.setItem(workspaceKey('schedules'),JSON.stringify(schedules));
+ localStorage.setItem(workspaceKey('backupBin'),JSON.stringify(backupBin));
+ localStorage.setItem(workspaceKey('backupFilter'),backupFilter);
+ localStorage.setItem(workspaceKey('connections'),JSON.stringify(connections));
+ localStorage.setItem(workspaceKey('connectionMeta'),JSON.stringify(connectionMeta));
+ localStorage.setItem(workspaceKey('integrationSettings'),JSON.stringify(integrationSettings));
+ localStorage.setItem(workspaceKey('discussion'),JSON.stringify(collaborationMessages));
+ if(!skipBroadcast) broadcastWorkspaceUpdate('state');
 }
 
 function moveToBackupBin(kind,item){
@@ -624,6 +908,7 @@ function moveToBackupBin(kind,item){
 }
 
 function setLibraryHidden(id,hidden){
+ if(blockViewerEdits()) return;
  const item=library.find(entry=>entry.id===id);
  if(!item) return;
  item.hidden=!!hidden;
@@ -633,6 +918,7 @@ function setLibraryHidden(id,hidden){
 }
 
 function setScheduleHidden(id,hidden){
+ if(blockViewerEdits()) return;
  const item=schedules.find(entry=>entry.id===id);
  if(!item) return;
  item.hidden=!!hidden;
@@ -642,6 +928,7 @@ function setScheduleHidden(id,hidden){
 }
 
 function deleteLibraryItem(id){
+ if(blockViewerEdits()) return;
  if(!window.confirm(t('confirmDeleteItem'))) return;
  const index=library.findIndex(entry=>entry.id===id);
  if(index===-1) return;
@@ -655,6 +942,7 @@ function deleteLibraryItem(id){
 }
 
 function deleteScheduleItem(id){
+ if(blockViewerEdits()) return;
  if(!window.confirm(t('confirmDeleteItem'))) return;
  const index=schedules.findIndex(entry=>entry.id===id);
  if(index===-1) return;
@@ -668,6 +956,7 @@ function deleteScheduleItem(id){
 }
 
 function restoreFromBackupBin(id){
+ if(blockViewerEdits()) return;
  const index=backupBin.findIndex(entry=>entry.id===id);
  if(index===-1) return;
  const record=backupBin.splice(index,1)[0];
@@ -682,6 +971,7 @@ function restoreFromBackupBin(id){
 }
 
 function deleteFromBackupBin(id){
+ if(blockViewerEdits()) return;
  if(!window.confirm(t('confirmDeletePermanentItem'))) return;
  const index=backupBin.findIndex(entry=>entry.id===id);
  if(index===-1) return;
@@ -691,6 +981,7 @@ function deleteFromBackupBin(id){
 }
 
 function emptyBackupBin(){
+ if(blockViewerEdits()) return;
  if(!backupBin.length){
   announce(t('backupEmpty'));
   return;
@@ -703,11 +994,13 @@ function emptyBackupBin(){
 }
 
 function saveConnections(){
- localStorage.setItem('connections',JSON.stringify(connections));
+ localStorage.setItem(workspaceKey('connections'),JSON.stringify(connections));
+ broadcastWorkspaceUpdate('connections');
 }
 
 function saveConnectionMeta(){
- localStorage.setItem('connectionMeta',JSON.stringify(connectionMeta));
+ localStorage.setItem(workspaceKey('connectionMeta'),JSON.stringify(connectionMeta));
+ broadcastWorkspaceUpdate('connections-meta');
 }
 
 function isConnected(platform){
@@ -746,12 +1039,15 @@ function getOauthStartUrl(platform){
 }
 
 function saveIntegrationSettings(){
+ if(blockViewerEdits()) return;
  integrationSettings.backendBaseUrl=document.getElementById('backendBaseUrl').value.trim();
- localStorage.setItem('integrationSettings',JSON.stringify(integrationSettings));
+ localStorage.setItem(workspaceKey('integrationSettings'),JSON.stringify(integrationSettings));
+ broadcastWorkspaceUpdate('integration-settings');
  announce(integrationSettings.backendBaseUrl?'OAuth settings saved.':'Using demo connect mode.');
 }
 
 function toggleConnection(platform){
+ if(blockViewerEdits()) return;
  const oauthUrl=getOauthStartUrl(platform);
  if(oauthUrl && !isConnected(platform)){
   window.open(oauthUrl,'_blank','noopener');
@@ -769,6 +1065,7 @@ function toggleConnection(platform){
 }
 
 async function disconnectPlatform(platform){
+ if(blockViewerEdits()) return;
  const base=(integrationSettings.backendBaseUrl||'').trim().replace(/\/$/,'');
  if(base){
   const slug=platformSlugs[platform]||platform.toLowerCase().replace(/[^a-z0-9]+/g,'-');
@@ -787,6 +1084,7 @@ async function disconnectPlatform(platform){
 }
 
 async function verifyConnection(platform){
+ if(blockViewerEdits()) return;
  const base=(integrationSettings.backendBaseUrl||'').trim().replace(/\/$/,'');
  if(!base){
   announce(t('verifyNeedBackend'));
@@ -811,6 +1109,7 @@ async function verifyConnection(platform){
 }
 
 async function verifyAllConnections(){
+ if(blockViewerEdits()) return;
  const base=(integrationSettings.backendBaseUrl||'').trim();
  if(!base){
   announce(t('verifyNeedBackend'));
@@ -918,6 +1217,7 @@ async function uploadContentToBackend(platform,title,description){
 }
 
 async function addContent(){
+ if(blockViewerEdits()) return;
  const title=document.getElementById('title').value.trim();
  const description=document.getElementById('description').value.trim();
  const platform=document.getElementById('platform').value;
@@ -953,6 +1253,7 @@ async function addContent(){
 }
 
 function schedulePost(){
+ if(blockViewerEdits()) return;
  const title=document.getElementById('scheduleTitle').value.trim();
  const time=document.getElementById('scheduleTime').value;
  const platformSelect=document.getElementById('schedulePlatforms');
@@ -1252,15 +1553,21 @@ function updateStats(){
 
 document.getElementById('languageSelect').value=language;
 document.getElementById('backendBaseUrl').value=integrationSettings.backendBaseUrl||'';
+document.getElementById('workspaceIdInput').value=workspaceId;
+document.getElementById('currentRole').value=currentRole;
+document.getElementById('collaboratorName').value=collaborationName;
 if(!localStorage.getItem('language')) localStorage.setItem('language',language);
 normalizeDataState();
 normalizeConnections();
+loadWorkspaceState();
 applyContrast();
 applyTranslations();
 renderConnections();
 renderLibrary();
 renderSchedules();
 renderBackupBin();
+renderCollaboration();
+initializeCreatorCast();
 updateStats();
 handleOauthCallback();
 </script>
