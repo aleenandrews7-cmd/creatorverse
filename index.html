@@ -92,6 +92,8 @@ textarea{resize:vertical;min-height:110px}
 .discussion-item:last-child{border-bottom:none}
 .discussion-meta{font-size:.82rem;color:var(--muted)}
 .help-fab{position:fixed;right:18px;bottom:18px;border:none;border-radius:999px;width:56px;height:56px;font-size:1.25rem;cursor:pointer;background:var(--button);color:var(--button-text);box-shadow:0 10px 24px rgba(2,6,23,.35);z-index:999}
+.help-fab[data-badge]:not([data-badge="0"])::after{content:attr(data-badge);position:absolute;top:-6px;right:-6px;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:#ef4444;color:#fff;font-size:.72rem;display:flex;align-items:center;justify-content:center;font-weight:700}
+.btn[data-badge]:not([data-badge="0"])::after{content:attr(data-badge);margin-left:8px;display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#ef4444;color:#fff;font-size:.72rem;font-weight:700;vertical-align:middle}
 .ticket-list{display:grid;gap:10px}
 .ticket-card{background:var(--status-bg);border:1px solid var(--status-border);border-radius:10px;padding:12px}
 .ticket-head{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
@@ -125,7 +127,7 @@ textarea{resize:vertical;min-height:110px}
 <button class="btn" onclick="show('dashboard')" role="tab" id="tab-dashboard" aria-controls="dashboard" aria-selected="false" data-i18n="navDashboard">Dashboard</button>
 <button class="btn" onclick="show('connections')" role="tab" id="tab-connections" aria-controls="connections" aria-selected="false" data-i18n="navConnections">Connections</button>
 <button class="btn" onclick="show('collaboration')" role="tab" id="tab-collaboration" aria-controls="collaboration" aria-selected="false" data-i18n="navCollaboration">CreatorCast</button>
-<button class="btn" onclick="show('support')" role="tab" id="tab-support" aria-controls="support" aria-selected="false" data-i18n="navSupport">Help Desk</button>
+<button class="btn" onclick="show('support')" role="tab" id="tab-support" aria-controls="support" aria-selected="false" data-i18n="navSupport" data-badge="0">Help Desk</button>
 <button class="btn btn-primary" onclick="show('upload')" role="tab" id="tab-upload" aria-controls="upload" aria-selected="false" data-i18n="uploadPrimaryCta">Upload Content</button>
 </div>
 </nav>
@@ -409,7 +411,7 @@ textarea{resize:vertical;min-height:110px}
 </section>
 <div class="status" id="status" aria-live="polite">Ready.</div>
 </main>
-<button class="help-fab" type="button" onclick="show('support')" aria-label="Open Help Desk">?</button>
+<button class="help-fab" type="button" onclick="show('support')" aria-label="Open Help Desk" id="helpFab" data-badge="0">?</button>
 <div class="footer">
 <p>© 2026 Creatorverse.ai</p>
 </div>
@@ -912,11 +914,25 @@ function resolveTicket(ticketId){
  renderSupport();
 }
 
+function updateSupportBadges(){
+ const openCount=helpTickets.filter(ticket=>ticket.status!=='resolved').length;
+ const supportTab=document.getElementById('tab-support');
+ const helpFab=document.getElementById('helpFab');
+ if(supportTab){
+  supportTab.setAttribute('data-badge',String(openCount));
+ }
+ if(helpFab){
+  helpFab.setAttribute('data-badge',String(openCount));
+  helpFab.setAttribute('aria-label',openCount?('Open Help Desk ('+openCount+' open tickets)'):'Open Help Desk');
+ }
+}
+
 function renderSupport(){
  const autoReply=document.getElementById('supportAutoReply');
  const list=document.getElementById('supportTicketList');
  const notice=document.getElementById('adminSupportNotice');
  if(!autoReply||!list||!notice) return;
+ updateSupportBadges();
 
  if(!autoReply.textContent.trim()) autoReply.textContent=t('supportAutoReplyDefault');
  notice.textContent=canEditWorkspace()?t('ownerNotice'):t('supportAdminOnly');
